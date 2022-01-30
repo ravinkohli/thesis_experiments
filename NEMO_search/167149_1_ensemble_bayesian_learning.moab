@@ -1,0 +1,11 @@
+#!/bin/bash
+#MSUB -l walltime=29:00:00
+#MSUB -l nodes=1:ppn=1
+#MSUB -l pmem=4gb
+#MSUB -N 167149_1_ensemble_bayesian_learning
+# Now call the program which does the work depending on the job id
+source ~/anaconda3/bin/activate thesis_exp-env
+JOBID=(${MOAB_JOBID //[/})
+    
+python run_dataset.py --task_id 167149 --wall_time 86400 --epochs 50 --seed 1 --nr_workers 1 --tmp_dir /work/ws/nemo/fr_rk250-autopytorch_thesis-0/runs/167149_1_ensemble_bayesian_learning --output_dir /work/ws/nemo/fr_rk250-autopytorch_thesis-0/runs/167149_1_ensemble_bayesian_learning --func_eval_time 300 --experiment_name ensemble_bayesian_learning
+
