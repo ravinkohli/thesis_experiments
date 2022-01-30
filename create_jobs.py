@@ -49,7 +49,7 @@ JOBID={job_id}
 
 def generate_job_file(cluster, experiment_details, file_to_run, save_folder, task_id=1, partition='bosch_cpu-cascadelake',
                       time_limit=(3, 00, 00), memory=6000):
-    job_name = f"{task_id}_{experiment_details['seed']}_ensemble_learning"
+    job_name = f"{task_id}_{experiment_details['seed']}_{experiment_details['experiment_name']}"
 
     python_call = f"python {file_to_run} --task_id {task_id} --wall_time {experiment_details['wall_time']} --epochs {experiment_details['epochs']} --seed {experiment_details['seed']} --nr_workers {experiment_details['nr_workers']}"
     exp_dir = os.path.join(experiment_details['exp_dir'], f'{job_name}')
