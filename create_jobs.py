@@ -127,7 +127,7 @@ if __name__ == '__main__':
     task_ids = get_task_ids()
     task_times = get_task_times()
     file_to_run = args.file_name
-    save_folder = f'{args.cluster}_search_trial'
+    save_folder = f'{args.cluster}_search'
     os.makedirs(save_folder, exist_ok=True)
     for (task_id, task_time) in zip(task_ids, task_times):
         experiment_details = dict()
@@ -147,4 +147,3 @@ if __name__ == '__main__':
             save_folder=save_folder,
             time_limit=(1, 5, 0),
             cluster=args.cluster)
-        break
