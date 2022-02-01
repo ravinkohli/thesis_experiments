@@ -3,7 +3,7 @@ import os
 import json
 
 file_data = dict()
-for root, dirs, files in os.walk('/work/ws/nemo/fr_rk250-autopytorch_icml-0/results'):
+for root, dirs, files in os.walk('/work/ws/nemo/fr_rk250-autopytorch_thesis-0/runs/'):
     for file in files:
         if 'final_result.json' in file:
             task = [file_name for file_name in root.split('/')][-1]
