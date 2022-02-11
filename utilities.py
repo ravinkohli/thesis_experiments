@@ -99,18 +99,17 @@ def get_experiment_args(experiment_name: str = 'ensemble_bayesian_learning'):
         #     'num_stacking_layers': 2,
         #     'smbo_class': autoPyTorchSMBO
         # },
-        'development':
+        'ensemble_selection':
             (
                 {
                  'resampling_strategy': HoldoutValTypes.stratified_holdout_validation,
                  'resampling_strategy_args': None,
                  'ensemble_method': EnsembleSelectionTypes.ensemble_selection,
                  'ensemble_size': 5,
-                 'num_stacking_layers': None,
                 },
-            {}
-        )
-    }
+                {}
+            )
+        }
     return EXPERIMENT_ARGS[experiment_name]
 
 
