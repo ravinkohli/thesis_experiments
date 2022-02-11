@@ -10,6 +10,8 @@ import time
 import warnings
 from zipfile import ZipFile
 
+from utilities import get_updates_for_regularization_cocktails
+
 os.environ['OMP_NUM_THREADS'] = '1'
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
 os.environ['MKL_NUM_THREADS'] = '1'
@@ -154,6 +156,9 @@ if __name__ == '__main__':
 
     # We search for the best hp configuration only in the case of a cocktail ingredient
     # that has hyperparameters from which it is controlled
+
+    pipeline_config = get_updates_for_regularization_cocktails(args)
+    api.set_pipeline_config(**pipeline_config)
 
     api.search(
         X_train=X_train.copy(),

@@ -175,7 +175,7 @@ def get_updates_for_regularization_cocktails(
         The search space updates like setting different hps to different values or ranges.
         Lastly include updates, which can be used to include different features.
     """
-    # No early stopping and train on gpu
+    # No early stopping and train on cpu
     pipeline_update = {
         'early_stopping': -1,
         'min_epochs': args.epochs,

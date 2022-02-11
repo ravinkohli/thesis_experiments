@@ -1,0 +1,11 @@
+#!/bin/bash
+#MSUB -l walltime=29:00:00
+#MSUB -l nodes=1:ppn=1
+#MSUB -l pmem=4gb
+#MSUB -N 189860_1_ensemble_selection
+# Now call the program which does the work depending on the job id
+source ~/anaconda3/bin/activate thesis_exp-env
+JOBID=(${MOAB_JOBID //[/})
+    
+python run_dataset.py --task_id 189860 --wall_time 300 --epochs 15 --seed 1 --nr_workers 1 --tmp_dir ./runs/autopytorch_thesis/189860_1_ensemble_selection --output_dir ./runs/autopytorch_thesis/189860_1_ensemble_selection --func_eval_time 6000 --experiment_name ensemble_selection
+
