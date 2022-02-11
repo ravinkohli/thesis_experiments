@@ -114,7 +114,7 @@ if __name__ == '__main__':
     # Data Loading
     # ============
     start_time = time.time()
-    X_train, X_test, y_train, y_test, categorical_indicator = get_data(
+    X_train, X_test, y_train, y_test, categorical_indicator, dataset_name = get_data(
         task_id=args.task_id,
         seed=args.seed,
     )
@@ -133,6 +133,7 @@ if __name__ == '__main__':
     )
 
     init_args, search_args = get_experiment_args(args.experiment_name)
+    print(f"init_args: {init_args}, search_args: {search_args}")
     ############################################################################
     # Build and fit a classifier
     # ==========================
@@ -159,6 +160,7 @@ if __name__ == '__main__':
         y_train=y_train.copy(),
         X_test=X_test.copy(),
         y_test=y_test.copy(),
+        dataset_name=dataset_name,
         optimize_metric='balanced_accuracy',
         total_walltime_limit=args.wall_time,
         memory_limit=12000,
@@ -187,10 +189,11 @@ if __name__ == '__main__':
     #     )
     # )
     result_dict = {
-        'train balanced accuracy': train_score,
-        'test balanced accuracy': test_score,
+        'train balanced accuracy': list(train_score.values())[-1],
+        'test balanced accuracy': list(test_score.values())[-1],
         'task_id': args.task_id,
         'duration': duration,
+        'dataset_name': dataset_name
     }
     # os.makedirs(result_directory, exist_ok=True)
     with open(os.path.join(args.output_dir, 'final_result.json'), 'w') as file:

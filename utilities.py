@@ -41,6 +41,7 @@ def get_data(
     """
     task = openml.tasks.get_task(task_id=task_id)
     dataset = task.get_dataset()
+    dataset_name = dataset.name
     X, y, categorical_indicator, _ = dataset.get_data(
         dataset_format='dataframe',
         target=dataset.default_target_attribute,
@@ -61,12 +62,12 @@ def get_data(
         stratify=y,
     )
 
-    return X_train, X_test, y_train, y_test, categorical_indicator
+    return X_train, X_test, y_train, y_test, categorical_indicator, dataset_name
 
 
 def get_experiment_args(experiment_name: str = 'ensemble_bayesian_learning'):
     EXPERIMENT_ARGS = {
-        'ensemble_bayesian_learning':
+        'ensemble_bayesian_learning_normalized_margin_loss':
             (
                 {
                     'resampling_strategy': HoldoutValTypes.stratified_holdout_validation,
@@ -75,9 +76,21 @@ def get_experiment_args(experiment_name: str = 'ensemble_bayesian_learning'):
                     'ensemble_size': 5,
                 },
                 {
+                    'use_ensemble_opt_loss': True
                 }
-            )
-        ,
+            ),
+        'ensemble_bayesian_learning_accuracy':
+            (
+                {
+                    'resampling_strategy': HoldoutValTypes.stratified_holdout_validation,
+                    'resampling_strategy_args': None,
+                    'ensemble_method': EnsembleSelectionTypes.stacking_ensemble,
+                    'ensemble_size': 5,
+                },
+                {
+                    'use_ensemble_opt_loss': False
+                }
+            ),
         # 'stacked_ensemble':{
         #     'resampling_strategy': RepeatedCrossValTypes.repeated_k_fold_cross_validation,
         #     'resampling_strategy_args': None,
@@ -86,16 +99,16 @@ def get_experiment_args(experiment_name: str = 'ensemble_bayesian_learning'):
         #     'num_stacking_layers': 2,
         #     'smbo_class': autoPyTorchSMBO
         # },
-        'development':(
+        'development':
+            (
                 {
-                'resampling_strategy': HoldoutValTypes.stratified_holdout_validation,
-                'resampling_strategy_args': None,
-                'ensemble_method': EnsembleSelectionTypes.ensemble_selection,
-                'ensemble_size': 5,
-                'num_stacking_layers': None,
+                 'resampling_strategy': HoldoutValTypes.stratified_holdout_validation,
+                 'resampling_strategy_args': None,
+                 'ensemble_method': EnsembleSelectionTypes.ensemble_selection,
+                 'ensemble_size': 5,
+                 'num_stacking_layers': None,
                 },
-            {
-            }
+            {}
         )
     }
     return EXPERIMENT_ARGS[experiment_name]
