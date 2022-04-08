@@ -54,15 +54,21 @@ def get_data(
 
     # uncomment only for np.arrays
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X,
-        y,
-        test_size=test_size,
-        random_state=seed,
-        stratify=y,
-    )
+    train_indices, test_indices = task.get_train_test_split_indices()
+    # AutoPyTorch fails when it is given a y DataFrame with False and True
+    # values and category as dtype. in its inner workings it uses sklearn
+    # which cannot detect the column type.
+    if isinstance(y[1], bool):
+        y = y.astype('bool')
 
-    return X_train, X_test, y_train, y_test, categorical_indicator, dataset_name
+    # uncomment only for np.arrays
+
+    X_train = X.iloc[train_indices]
+    y_train = y.iloc[train_indices]
+    X_test = X.iloc[test_indices]
+    y_test = y.iloc[test_indices]
+
+    return X_train, X_test, y_train, y_test, categorical_indicator, dataset.name
 
 
 def get_experiment_args(experiment_name: str = 'ensemble_bayesian_learning'):
