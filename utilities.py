@@ -179,9 +179,9 @@ def get_updates_for_regularization_cocktails(
     pipeline_update = {
         'early_stopping': -1,
         # 'min_epochs': args.epochs,
-        'epochs': args.epochs,
+        # 'epochs': args.epochs,
         "device": 'cpu',
-        'torch_num_threads': 2
+        'torch_num_threads': 1
     }
 
     return pipeline_update

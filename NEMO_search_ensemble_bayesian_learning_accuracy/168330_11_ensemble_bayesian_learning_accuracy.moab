@@ -1,0 +1,11 @@
+#!/bin/bash
+#MSUB -l walltime=96:00:00
+#MSUB -l nodes=1:ppn=1
+#MSUB -l pmem=15gb
+#MSUB -N 168330_11_ensemble_bayesian_learning_accuracy
+# Now call the program which does the work depending on the job id
+source ~/anaconda3/bin/activate thesis_exp-env
+JOBID=(${MOAB_JOBID //[/})
+    
+python /home/fr/fr_fr/fr_rk250/thesis_experiments/run_dataset.py --task_id 168330 --wall_time 338400 --min_budget 12.5 --max_budget 50 --seed 11 --nr_workers 1 --tmp_dir /work/ws/nemo/fr_rk250-autopytorch_thesis-0/full_automlbenchmark_runs/ensemble_bayesian_learning_accuracy/168330_11_ensemble_bayesian_learning_accuracy --output_dir /work/ws/nemo/fr_rk250-autopytorch_thesis-0/full_automlbenchmark_runs/ensemble_bayesian_learning_accuracy/168330_11_ensemble_bayesian_learning_accuracy --func_eval_time 126000 --experiment_name ensemble_bayesian_learning_accuracy
+

@@ -91,7 +91,16 @@ parser.add_argument(
     type=str,
     default='stacked_ensemble'
 )
-
+parser.add_argument(
+    '--min_budget',
+    type=float,
+    default=12.5,
+)
+parser.add_argument(
+    '--max_budget',
+    type=float,
+    default=50,
+)
 args = parser.parse_args()
 options = vars(args)
 print(options)
@@ -154,9 +163,6 @@ if __name__ == '__main__':
     # Search for the best hp configuration
     # =====================================================
 
-    # We search for the best hp configuration only in the case of a cocktail ingredient
-    # that has hyperparameters from which it is controlled
-
     pipeline_config = get_updates_for_regularization_cocktails(args)
     api.set_pipeline_config(**pipeline_config)
 
@@ -171,10 +177,13 @@ if __name__ == '__main__':
         memory_limit=12000,
         func_eval_time_limit_secs=args.func_eval_time,
         enable_traditional_pipeline=False,
-        get_smac_object_callback=get_smac_object,
+        # get_smac_object_callback=get_smac_object,
         smac_scenario_args={
-            'runcount_limit': 1000,
+            'runcount_limit': 840,
         },
+        min_budget=args.min_budget,
+        max_budget=args.max_budget,
+        all_supported_metrics=False,
         **search_args
     )
 
