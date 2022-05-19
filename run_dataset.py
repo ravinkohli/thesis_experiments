@@ -1,16 +1,10 @@
 import argparse
-from cgi import test
 import json
-from operator import ge
 import os
-import pandas as pd
-import pickle
 import random
 import time
 import warnings
-from zipfile import ZipFile
 
-from utilities import get_updates_for_regularization_cocktails
 
 os.environ['OMP_NUM_THREADS'] = '1'
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
@@ -23,7 +17,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 import torch
 
 from autoPyTorch.api.tabular_classification import TabularClassificationTask
-from autoPyTorch.datasets.resampling_strategy import HoldoutValTypes
+from autoPyTorch.api.utils import get_autogluon_default_nn_config
 
 import numpy as np
 
@@ -62,9 +56,14 @@ parser.add_argument(
     default=500,
 )
 parser.add_argument(
+    '--min_epochs',
+    type=int,
+    default=12,
+)
+parser.add_argument(
     '--epochs',
     type=int,
-    default=5,
+    default=50,
 )
 parser.add_argument(
     '--seed',
@@ -72,12 +71,17 @@ parser.add_argument(
     default=11,
 )
 parser.add_argument(
-    '--tmp_dir',
-    type=str,
-    default='./runs/autoPyTorch_portfolio',
+    '--splits',
+    type=int,
+    default=5,
 )
 parser.add_argument(
-    '--output_dir',
+    '--repeats',
+    type=int,
+    default=2,
+)
+parser.add_argument(
+    '--exp_dir',
     type=str,
     default='./runs/autoPyTorch_portfolio',
 )
@@ -92,14 +96,29 @@ parser.add_argument(
     default='stacked_ensemble'
 )
 parser.add_argument(
-    '--min_budget',
-    type=float,
-    default=12.5,
+    '--use_ensemble_opt_loss',
+    type=bool,
+    default=False
 )
 parser.add_argument(
-    '--max_budget',
-    type=float,
-    default=50,
+    '--num_stacking_layers',
+    type=int,
+    default=1
+)
+parser.add_argument(
+    '--ensemble_size',
+    type=int,
+    default=7
+)
+parser.add_argument(
+    '--posthoc_ensemble_fit_stacking_ensemble_optimization',
+    type=bool,
+    default=False
+)
+parser.add_argument(
+    '--enable_traditional_pipeline',
+    type=bool,
+    default=False
 )
 args = parser.parse_args()
 options = vars(args)
@@ -111,7 +130,8 @@ if __name__ == '__main__':
     from utilities import (
         get_data,
         get_smac_object,
-        get_experiment_args
+        get_experiment_args,
+        get_updates_for_regularization_cocktails
     )
 
     # Setting up reproducibility
@@ -125,25 +145,33 @@ if __name__ == '__main__':
     # Data Loading
     # ============
     start_time = time.time()
-    X_train, X_test, y_train, y_test, categorical_indicator, dataset_name = get_data(
+    X_train, X_test, y_train, y_test, categorical_indicator, dataset_name, feat_type = get_data(
         task_id=args.task_id,
-        seed=args.seed,
     )
 
     output_dir = os.path.expanduser(
         os.path.join(
-            args.output_dir,
+            args.exp_dir,
             f'out',
         )
     )
     temp_dir = os.path.expanduser(
         os.path.join(
-            args.tmp_dir,
+            args.exp_dir,
             f'tmp',
         )
     )
-
-    init_args, search_args = get_experiment_args(args.experiment_name)
+    search_space_updates = get_autogluon_default_nn_config(feat_type=feat_type)
+    init_args, search_args = get_experiment_args(
+        args.experiment_name,
+        splits=args.splits,
+        repeats=args.repeats,
+        use_ensemble_opt_loss=args.use_ensemble_opt_loss,
+        num_stacking_layers=args.num_stacking_layers,
+        ensemble_size=args.ensemble_size,
+        posthoc_ensemble_fit_stacking_ensemble_optimization=args.posthoc_ensemble_fit_stacking_ensemble_optimization,
+        enable_traditional_pipeline=args.enable_traditional_pipeline
+    )
     print(f"init_args: {init_args}, search_args: {search_args}")
     ############################################################################
     # Build and fit a classifier
@@ -156,6 +184,7 @@ if __name__ == '__main__':
         delete_tmp_folder_after_terminate=False,
         delete_output_folder_after_terminate=False,
         seed=args.seed,
+        search_space_updates=search_space_updates
         **init_args
     )
 
@@ -166,7 +195,8 @@ if __name__ == '__main__':
     pipeline_config = get_updates_for_regularization_cocktails(args)
     api.set_pipeline_config(**pipeline_config)
 
-    api.search(
+    search_func = search_args.pop('search_func', 'search')
+    getattr(api, search_func)(
         X_train=X_train.copy(),
         y_train=y_train.copy(),
         X_test=X_test.copy(),
@@ -174,12 +204,11 @@ if __name__ == '__main__':
         dataset_name=dataset_name,
         optimize_metric='balanced_accuracy',
         total_walltime_limit=args.wall_time,
-        memory_limit=12000,
+        memory_limit=args.mem_limit,
         func_eval_time_limit_secs=args.func_eval_time,
-        enable_traditional_pipeline=False,
-        # get_smac_object_callback=get_smac_object,
+        get_smac_object_callback=get_smac_object,
         smac_scenario_args={
-            'runcount_limit': 840,
+            'runcount_limit': 1000,
         },
         min_budget=args.min_budget,
         max_budget=args.max_budget,
@@ -197,18 +226,14 @@ if __name__ == '__main__':
     print(f'Final Test Balanced accuracy: {test_score}')
     print(f'Time taken: {duration}')
 
-    # result_directory = os.path.expanduser(
-    #     os.path.join(
-    #         args.output_dir,
-    #     )
-    # )
     result_dict = {
         'train balanced accuracy': list(train_score.values())[-1],
         'test balanced accuracy': list(test_score.values())[-1],
         'task_id': args.task_id,
         'duration': duration,
-        'dataset_name': dataset_name
+        'dataset_name': dataset_name,
+        **options
     }
-    # os.makedirs(result_directory, exist_ok=True)
-    with open(os.path.join(args.output_dir, 'final_result.json'), 'w') as file:
+
+    with open(os.path.join(args.exp_dir, 'final_result.json'), 'w') as file:
         json.dump(result_dict, file)

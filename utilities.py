@@ -1,27 +1,29 @@
 from argparse import Namespace
-import typing
+from typing import Any, Callable, Dict, List, Optional
+
+from ConfigSpace.configuration_space import Configuration
 
 import dask.distributed
 
 import openml
 
-from sklearn.model_selection import train_test_split
-
-from autoPyTorch.optimizer.utils import autoPyTorchSMBO
-from autoPyTorch.datasets.resampling_strategy import HoldoutValTypes
-from autoPyTorch.ensemble.utils import EnsembleSelectionTypes
-# from autoPyTorch.datasets.resampling_strategy import RepeatedCrossValTypes
-
-from smac.intensification.simple_intensifier import SimpleIntensifier
 from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
 from smac.scenario.scenario import Scenario
 from smac.facade.smac_ac_facade import SMAC4AC
+from smac.intensification.hyperband import Hyperband
+from smac.optimizer.smbo import SMBO
+
+from autoPyTorch.optimizer.utils import autoPyTorchSMBO
+from autoPyTorch.datasets.resampling_strategy import RepeatedCrossValTypes
+from autoPyTorch.ensemble.utils import EnsembleSelectionTypes
+
+
+def get_compression_args():
+    return {'memory_allocation': 0.02, 'methods': ['precision', 'subsample']}
 
 
 def get_data(
         task_id: int,
-        test_size: float = 0.2,
-        seed: int = 11,
 ):
     """
     Args:
@@ -41,7 +43,6 @@ def get_data(
     """
     task = openml.tasks.get_task(task_id=task_id)
     dataset = task.get_dataset()
-    dataset_name = dataset.name
     X, y, categorical_indicator, _ = dataset.get_data(
         dataset_format='dataframe',
         target=dataset.default_target_attribute,
@@ -68,84 +69,139 @@ def get_data(
     X_test = X.iloc[test_indices]
     y_test = y.iloc[test_indices]
 
-    return X_train, X_test, y_train, y_test, categorical_indicator, dataset.name
+    feat_type = ["numerical" if not indicator else "categorical" for indicator in categorical_indicator]
+
+    return X_train, X_test, y_train, y_test, categorical_indicator, dataset.name, feat_type
 
 
-def get_experiment_args(experiment_name: str = 'ensemble_bayesian_learning'):
+def get_experiment_args(
+    experiment_name: str = 'ensemble_bayesian_optimisation',
+    splits: int = 5,
+    repeats: int = 2,
+    use_ensemble_opt_loss: bool = False,
+    num_stacking_layers: int = 1,
+    ensemble_size: int = 7,
+    posthoc_ensemble_fit_stacking_ensemble_optimization: bool = False,
+    enable_traditional_pipeline: bool = False
+):
+    EXPERIMENT_ARGS = _get_experiment_args(splits, repeats, use_ensemble_opt_loss, num_stacking_layers, ensemble_size, posthoc_ensemble_fit_stacking_ensemble_optimization, enable_traditional_pipeline)
+    return EXPERIMENT_ARGS[experiment_name]
+
+def _get_experiment_args(
+    splits: int = 5,
+    repeats: int = 2,
+    use_ensemble_opt_loss: bool = False,
+    num_stacking_layers: int = 1,
+    ensemble_size: int = 7,
+    posthoc_ensemble_fit_stacking_ensemble_optimization: bool = False,
+    enable_traditional_pipeline: bool = False
+):
     EXPERIMENT_ARGS = {
-        'ensemble_bayesian_learning_normalized_margin_loss':
+        'stacking_ensemble_bayesian_optimisation':
             (
                 {
-                    'resampling_strategy': HoldoutValTypes.stratified_holdout_validation,
-                    'resampling_strategy_args': None,
-                    'ensemble_method': EnsembleSelectionTypes.stacking_ensemble,
-                    'ensemble_size': 5,
+                    'resampling_strategy': RepeatedCrossValTypes.stratified_repeated_k_fold_cross_validation,
+                    'resampling_strategy_args': {'num_splits': splits, 'num_repeats': repeats},
+                    'ensemble_method': EnsembleSelectionTypes.stacking_optimisation_ensemble,
+                    'ensemble_size': ensemble_size,
+                    'num_stacking_layers': num_stacking_layers,
                 },
-                {
-                    'use_ensemble_opt_loss': True
+                { 
+                    'smbo_class': autoPyTorchSMBO,
+                    'use_ensemble_opt_loss': use_ensemble_opt_loss,
+                    'posthoc_ensemble_fit_stacking_ensemble_optimization': posthoc_ensemble_fit_stacking_ensemble_optimization,
+                    'enable_traditional_pipeline': enable_traditional_pipeline
                 }
             ),
-        'ensemble_bayesian_learning_accuracy':
-            (
-                {
-                    'resampling_strategy': HoldoutValTypes.stratified_holdout_validation,
-                    'resampling_strategy_args': None,
-                    'ensemble_method': EnsembleSelectionTypes.stacking_ensemble,
-                    'ensemble_size': 5,
-                },
-                {
-                    'use_ensemble_opt_loss': False
-                }
-            ),
-        # 'stacked_ensemble':{
-        #     'resampling_strategy': RepeatedCrossValTypes.repeated_k_fold_cross_validation,
-        #     'resampling_strategy_args': None,
-        #     'ensemble_method': EnsembleSelectionTypes.stacking_ensemble,
-        #     'ensemble_size': 5,
-        #     'num_stacking_layers': 2,
-        #     'smbo_class': autoPyTorchSMBO
-        # },
         'ensemble_selection':
             (
                 {
-                 'resampling_strategy': HoldoutValTypes.stratified_holdout_validation,
-                 'resampling_strategy_args': None,
-                 'ensemble_method': EnsembleSelectionTypes.ensemble_selection,
-                 'ensemble_size': 5,
+                    'resampling_strategy': RepeatedCrossValTypes.stratified_repeated_k_fold_cross_validation,
+                    'resampling_strategy_args': {'num_splits': splits, 'num_repeats': repeats},
+                    'ensemble_method': EnsembleSelectionTypes.ensemble_selection,
+                    'ensemble_size': ensemble_size,
                 },
-                {}
-            )
+                {
+                    'enable_traditional_pipeline': enable_traditional_pipeline
+                }
+            ),
+        'stacking_ensemble_selection_per_layer':
+            (
+                {
+                    'resampling_strategy': RepeatedCrossValTypes.repeated_k_fold_cross_validation,
+                    'resampling_strategy_args': {'num_splits': splits, 'num_repeats': repeats},
+                    'ensemble_method': EnsembleSelectionTypes.stacking_ensemble_selection_per_layer,
+                    'ensemble_size': ensemble_size,
+                    'num_stacking_layers': num_stacking_layers,
+                },
+                {
+                    'enable_traditional_pipeline': enable_traditional_pipeline
+                }
+            ),
+        'stacking_repeat_models':
+            (
+                {
+                    'resampling_strategy': RepeatedCrossValTypes.repeated_k_fold_cross_validation,
+                    'resampling_strategy_args': {'num_splits': splits, 'num_repeats': repeats},
+                    'ensemble_method': EnsembleSelectionTypes.stacking_repeat_models,
+                    'ensemble_size': ensemble_size,
+                    'num_stacking_layers': num_stacking_layers,
+                },
+                {
+                    'enable_traditional_pipeline': enable_traditional_pipeline
+                }
+            ),
+        'stacking_autogluon':
+            (
+                {
+                    'resampling_strategy': RepeatedCrossValTypes.repeated_k_fold_cross_validation,
+                    'resampling_strategy_args': {'num_splits': splits, 'num_repeats': repeats},
+                    'ensemble_method': EnsembleSelectionTypes.stacking_autogluon,
+                    'ensemble_size': ensemble_size,
+                    'num_stacking_layers': num_stacking_layers,
+                },
+                {
+                    'search_func': 'run_autogluon_stacking'
+                }
+            ),
         }
-    return EXPERIMENT_ARGS[experiment_name]
+        
+    return EXPERIMENT_ARGS
 
 
 def get_smac_object(
-    scenario_dict: typing.Dict[str, typing.Any],
+    scenario_dict: Dict[str, Any],
     seed: int,
-    ta: typing.Callable,
-    ta_kwargs: typing.Dict[str, typing.Any],
+    ta: Callable,
+    ta_kwargs: Dict[str, Any],
     n_jobs: int,
     initial_budget: int,
     max_budget: int,
-    initial_configurations,
-    dask_client: typing.Optional[dask.distributed.Client],
+    dask_client: Optional[dask.distributed.Client],
+    smbo_class: Optional[SMBO] = None,
+    initial_configurations: Optional[List[Configuration]] = None,
 ) -> SMAC4AC:
     """
     This function returns an SMAC object that is gonna be used as
     optimizer of pipelines
+
     Args:
-    _____
-        scenario_dict (typing.Dict[str, typing.Any]): constrain on how to run
+        scenario_dict (Dict[str, Any]): constrain on how to run
             the jobs
         seed (int): to make the job deterministic
-        ta (typing.Callable): the function to be intensifier by smac
-        ta_kwargs (typing.Dict[str, typing.Any]): Arguments to the above ta
+        ta (Callable): the function to be intensifier by smac
+        ta_kwargs (Dict[str, Any]): Arguments to the above ta
         n_jobs (int): Amount of cores to use for this task
         dask_client (dask.distributed.Client): User provided scheduler
+        initial_configurations (List[Configuration]): List of initial
+            configurations which smac will run before starting the search process
+
     Returns:
-    ________
         (SMAC4AC): sequential model algorithm configuration object
+
     """
+    intensifier = Hyperband
+
     rh2EPM = RunHistory2EPM4LogCost
     return SMAC4AC(
         scenario=Scenario(scenario_dict),
@@ -153,11 +209,14 @@ def get_smac_object(
         runhistory2epm=rh2EPM,
         tae_runner=ta,
         tae_runner_kwargs=ta_kwargs,
-        initial_configurations=None,
+        initial_configurations=initial_configurations,
         run_id=seed,
-        intensifier=SimpleIntensifier,
+        intensifier=intensifier,
+        intensifier_kwargs={'initial_budget': initial_budget, 'max_budget': max_budget,
+                            'eta': 2, 'min_chall': 1, 'instance_order': 'shuffle_once'},
         dask_client=dask_client,
         n_jobs=n_jobs,
+        smbo_class=smbo_class
     )
 
 
@@ -176,16 +235,12 @@ def get_updates_for_regularization_cocktails(
             for the different regularization ingredients.
     Returns:
     ________
-    pipeline_update, search_space_updates, include_updates - Tuple[dict, HyperparameterSearchSpaceUpdates, dict]
+    pipeline_update - dict
         The pipeline updates like number of epochs, budget, seed etc.
-        The search space updates like setting different hps to different values or ranges.
-        Lastly include updates, which can be used to include different features.
     """
     # No early stopping and train on cpu
     pipeline_update = {
-        'early_stopping': -1,
-        # 'min_epochs': args.epochs,
-        # 'epochs': args.epochs,
+        'early_stopping': 20,
         "device": 'cpu',
         'torch_num_threads': 1
     }
