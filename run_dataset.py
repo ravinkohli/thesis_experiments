@@ -51,6 +51,11 @@ parser.add_argument(
     default=3000,
 )
 parser.add_argument(
+    '--mem_limit',
+    type=int,
+    default=8000,
+)
+parser.add_argument(
     '--func_eval_time',
     type=int,
     default=500,
@@ -73,7 +78,7 @@ parser.add_argument(
 parser.add_argument(
     '--splits',
     type=int,
-    default=5,
+    default=3,
 )
 parser.add_argument(
     '--repeats',
@@ -120,6 +125,11 @@ parser.add_argument(
     type=bool,
     default=False
 )
+parser.add_argument(
+    '--dataset_compression',
+    help='whether to use search space updates from the reg cocktails paper',
+    default=False,
+)
 args = parser.parse_args()
 options = vars(args)
 print(options)
@@ -131,7 +141,8 @@ if __name__ == '__main__':
         get_data,
         get_smac_object,
         get_experiment_args,
-        get_updates_for_regularization_cocktails
+        get_updates_for_regularization_cocktails,
+        get_compression_args
     )
 
     # Setting up reproducibility
@@ -170,7 +181,7 @@ if __name__ == '__main__':
         num_stacking_layers=args.num_stacking_layers,
         ensemble_size=args.ensemble_size,
         posthoc_ensemble_fit_stacking_ensemble_optimization=args.posthoc_ensemble_fit_stacking_ensemble_optimization,
-        enable_traditional_pipeline=args.enable_traditional_pipeline
+        enable_traditional_pipeline=args.enable_traditional_pipeline,
     )
     print(f"init_args: {init_args}, search_args: {search_args}")
     ############################################################################
@@ -184,7 +195,8 @@ if __name__ == '__main__':
         delete_tmp_folder_after_terminate=False,
         delete_output_folder_after_terminate=False,
         seed=args.seed,
-        search_space_updates=search_space_updates
+        search_space_updates=search_space_updates,
+        feat_type=feat_type,
         **init_args
     )
 
@@ -196,7 +208,7 @@ if __name__ == '__main__':
     api.set_pipeline_config(**pipeline_config)
 
     search_func = search_args.pop('search_func', 'search')
-    getattr(api, search_func)(
+    common_args = dict(
         X_train=X_train.copy(),
         y_train=y_train.copy(),
         X_test=X_test.copy(),
@@ -206,15 +218,22 @@ if __name__ == '__main__':
         total_walltime_limit=args.wall_time,
         memory_limit=args.mem_limit,
         func_eval_time_limit_secs=args.func_eval_time,
+        max_budget=args.epochs,
+        all_supported_metrics=False,
+        dataset_compression=get_compression_args() if args.dataset_compression else False,
+        **search_args
+    )
+
+    search_func_args = dict(
         get_smac_object_callback=get_smac_object,
         smac_scenario_args={
             'runcount_limit': 1000,
         },
-        min_budget=args.min_budget,
-        max_budget=args.max_budget,
-        all_supported_metrics=False,
-        **search_args
-    )
+        min_budget=args.min_epochs,
+        )
+    if search_func == "search":
+        common_args.update(search_func_args)
+    getattr(api, search_func)(**common_args)
 
     train_preds = api.predict(X_train)
     test_preds = api.predict(X_test)

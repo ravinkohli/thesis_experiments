@@ -2,7 +2,7 @@ import pandas as pd
 import argparse
 
 import os
-
+from experiment_name_to_args import parameters, _get_experiment_args
 
 def get_slurm_jobfile_template(job_name, env_name, partition='bosch_cpu-cascadelake',
                                time_limit=(3, 00, 00), log_dir='./log', memory=6000, n_cores=10):
@@ -53,20 +53,29 @@ JOBID={job_id}
 
 def generate_job_file(experiment_details, file_to_run, save_folder, env_name, task_id=1, partition='bosch_cpu-cascadelake',
                       time_limit=(3, 00, 00), memory=6000, cluster='slurm'):
-    job_name = f"{task_id}_{experiment_details['argument']}_{experiment_details['seed']}_autoPyTorch_cocktails"
+    setup_options = ['exp_dir', 'min_epochs', 'epochs']
+    remove_options = ['file_to_run', 'cluster', 'env_name', 'task_ids_file']
+    exp_details = {}
+    setup_details = {}
+    for key in experiment_details:
+        if key in setup_options:
+            setup_details[key] = experiment_details[key]
+        else:
+            exp_details[key] = experiment_details[key]
+    e_details = {}
+    for key in exp_details:
+        if key not in remove_options:
+            e_details[key] = exp_details[key]
 
-    python_call = f"python {file_to_run} --task_id {task_id} --wall_time {experiment_details['wall_time']} --epochs {experiment_details['epochs']} --seed {experiment_details['seed']} --updates_reg_cocktails_paper {experiment_details['updates_reg_cocktails_paper']} --nr_workers {experiment_details['nr_workers']}"
-    if not experiment_details['is_flag']:
-        job_name = f"{job_name}_{experiment_details['arg_value']}"
-        python_call = f"{python_call} --{experiment_details['argument']} {experiment_details['arg_value']}"
-    else:
-        python_call = f"{python_call} --{experiment_details['argument']}"
-        if 'command' in experiment_details:
-            job_name = f"{job_name}_{experiment_details['arg_value']}"
-            python_call = f"{python_call} --{experiment_details['command']} {experiment_details['arg_value']}"
-    # func_eval_time = get_increased_task_time(job_name, experiment_details['func_eval_time'])
-    exp_dir = os.path.join(experiment_details['exp_dir'], f'{job_name}')
-    python_call = f"{python_call} --tmp_dir {exp_dir} --output_dir {exp_dir} --func_eval_time {experiment_details['func_eval_time']} --dataset_compression {experiment_details['dataset_compression']}"
+    name = "_".join([f"{key[0]}_{value}" for key, value in e_details.items()])
+    job_name = f"{task_id}_{name}_autoPyTorch"
+    python_experiment_call = " ".join([f"--{key} {value}" for key, value in e_details.items()])
+    needed_params = [f"{key}_{val}" for key, val in e_details.items()]
+    setup_details['exp_dir'] = os.path.join(setup_details['exp_dir'], *needed_params, f'{job_name}')
+
+    python_setup_call = " ".join([f"--{key} {value}" for key, value in setup_details.items()])
+    python_call = f"python {file_to_run} --task_id {task_id} {python_experiment_call} {python_setup_call}"
+
     template_func = get_slurm_jobfile_template if cluster.lower() == 'slurm' else get_nemo_jobfile_template
     header, footer = template_func(job_name=job_name, partition=partition,
                                    time_limit=time_limit, log_dir='./logs',
@@ -84,14 +93,14 @@ parser = argparse.ArgumentParser(
     description='Run autoPyTorch on a benchmark'
 )
 parser.add_argument(
+    '--min_epochs',
+    type=int,
+    default=12,
+)
+parser.add_argument(
     '--epochs',
     type=int,
     default=105,
-)
-parser.add_argument(
-    '--seed',
-    type=int,
-    default=11,
 )
 parser.add_argument(
     '--exp_dir',
@@ -114,6 +123,11 @@ parser.add_argument(
     default=600,
 )
 parser.add_argument(
+    '--mem_limit',
+    type=int,
+    default=8000,
+)
+parser.add_argument(
     '--func_eval_time',
     type=int,
     default=100800,
@@ -126,7 +140,7 @@ parser.add_argument(
 parser.add_argument(
     '--env_name',
     type=str,
-    default='reg_cocktails-env',
+    default='thesis_exp-env',
 )
 parser.add_argument(
     '--dataset_compression',
@@ -138,47 +152,12 @@ parser.add_argument(
     help='which tasks',
     type=str,
     choices=['4days_task_ids', '2days_task_ids', 'task_ids_s_218'],
-    default='task_ids_s_218',
-)
-parser.add_argument(
-    '--use_ensemble_opt_loss',
-    type=bool,
-    default=False
-)
-parser.add_argument(
-    '--num_stacking_layers',
-    type=int,
-    default=1
-)
-parser.add_argument(
-    '--ensemble_size',
-    type=int,
-    default=7
-)
-parser.add_argument(
-    '--posthoc_ensemble_fit_stacking_ensemble_optimization',
-    type=bool,
-    default=False
-)
-parser.add_argument(
-    '--enable_traditional_pipeline',
-    type=bool,
-    default=False
-)
-parser.add_argument(
-    '--splits',
-    type=int,
-    default=5,
-)
-parser.add_argument(
-    '--repeats',
-    type=int,
-    default=2,
+    default='2days_task_ids',
 )
 parser.add_argument(
     '--experiment_name',
     type=str,
-    default='stacked_ensemble'
+    default='ensemble_selection'
 )
 args = parser.parse_args()
 options = vars(args)
@@ -186,35 +165,35 @@ print(options)
 
 
 if __name__ == '__main__':
+    from itertools import product
     dataset_info = pd.read_csv(f'./{args.task_ids_file}.csv')
-    save_folder = 'NEMO_reg_cocktails_paper_reproduce_pytorch_embedding_multiseeded_4days'
+    save_folder = f"NEMO_thesis_{args.experiment_name}_{args.task_ids_file.split('_')[0]}"
     seeds = [364, 438, 444, 875]  # random.sample(range(1000), 4)
     for seed in seeds:
-        seed_save_folder = os.path.join(save_folder, f'{seed}')
-        os.makedirs(seed_save_folder, exist_ok=True)
-        for task_id in dataset_info['Task_id']:
-            experiment_details = dict()
-            experiment_details['epochs'] = args.epochs
-            experiment_details['nr_workers'] = args.nr_workers
-            experiment_details['seed'] = seed
-            experiment_details['exp_dir'] = args.exp_dir
-            experiment_details['wall_time'] = args.wall_time
-            experiment_details['func_eval_time'] = args.func_eval_time
-            experiment_details['dataset_compression'] = args.dataset_compression
+        params = parameters[args.experiment_name]
+        values = list(product(*list(params.values())))
+        keys = list(params.keys())
+        for value in values:
+            needed_params = [f"{key}_{val}" for key, val in zip(keys, value)]
 
-            seconds_in_day = 60 * 60 * 24
-            seconds_in_hour = 60 * 60
-            seconds_in_minute = 60
-            seconds = min(args.wall_time + 12 * seconds_in_hour, 345600)
-            days = seconds // seconds_in_day
-            hours = (seconds - (days * seconds_in_day)) // seconds_in_hour
-            minutes = (seconds - (days * seconds_in_day) - (hours * seconds_in_hour)) // seconds_in_minute
+            experiment_save_folder = os.path.join(save_folder, f'{args.experiment_name}', *needed_params, f'{seed}')
+            os.makedirs(experiment_save_folder, exist_ok=True)
+            experiment_details = {key: val for key, val in zip(keys, value)}
+            experiment_details = {**experiment_details, **options}
+            for task_id in dataset_info['Task_id']:
+                seconds_in_day = 60 * 60 * 24
+                seconds_in_hour = 60 * 60
+                seconds_in_minute = 60
+                seconds = min(args.wall_time + 12 * seconds_in_hour, 345600)
+                days = seconds // seconds_in_day
+                hours = (seconds - (days * seconds_in_day)) // seconds_in_hour
+                minutes = (seconds - (days * seconds_in_day) - (hours * seconds_in_hour)) // seconds_in_minute
 
-            generate_job_file(task_id=int(task_id),
-                                experiment_details=experiment_details,
-                                memory=120000,
-                                file_to_run=args.file_to_run,
-                                save_folder=seed_save_folder,
-                                time_limit=(days, hours, minutes),
-                                cluster=args.cluster,
-                                env_name=args.env_name)
+                generate_job_file(task_id=int(task_id),
+                                    experiment_details=experiment_details,
+                                    memory=args.mem_limit,
+                                    file_to_run=args.file_to_run,
+                                    save_folder=experiment_save_folder,
+                                    time_limit=(days, hours, minutes),
+                                    cluster=args.cluster,
+                                    env_name=args.env_name)
