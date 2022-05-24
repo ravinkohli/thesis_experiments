@@ -42,7 +42,7 @@ parameters = {
     {
         'splits': [3, 5],
         'repeats': [1, 2],
-        'num_stacking_layers': [1, 2, 3],
+        'num_stacking_layers': [2, 3],
     },
 }
 
