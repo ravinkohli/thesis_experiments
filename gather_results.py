@@ -17,3 +17,4 @@ for root, dirs, files in os.walk('/work/ws/nemo/fr_rk250-autopytorch_thesis-0/ru
             # del content["task_id"]
 
 pd.DataFrame(file_data).transpose().to_csv('results/gathered_results_proper.csv')
+

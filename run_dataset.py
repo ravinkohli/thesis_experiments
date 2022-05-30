@@ -4,7 +4,7 @@ import os
 import random
 import time
 import warnings
-
+import shutil
 
 os.environ['OMP_NUM_THREADS'] = '1'
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
@@ -25,13 +25,11 @@ from smac.tae import StatusType
 
 def str2bool(v):
     if isinstance(v, bool):
-        return [v, ]
+        return v
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return [True, ]
+        return True
     elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return [False, ]
-    elif v.lower() == 'conditional':
-        return [True, False]
+        return False
     else:
         raise argparse.ArgumentTypeError('No valid value given.')
 
@@ -102,7 +100,7 @@ parser.add_argument(
 )
 parser.add_argument(
     '--use_ensemble_opt_loss',
-    type=bool,
+    type=str2bool,
     default=False
 )
 parser.add_argument(
@@ -117,17 +115,18 @@ parser.add_argument(
 )
 parser.add_argument(
     '--posthoc_ensemble_fit_stacking_ensemble_optimization',
-    type=bool,
+    type=str2bool,
     default=False
 )
 parser.add_argument(
     '--enable_traditional_pipeline',
-    type=bool,
+    type=str2bool,
     default=False
 )
 parser.add_argument(
     '--dataset_compression',
     help='whether to use search space updates from the reg cocktails paper',
+    type=str2bool,
     default=False,
 )
 args = parser.parse_args()
@@ -256,3 +255,6 @@ if __name__ == '__main__':
 
     with open(os.path.join(args.exp_dir, 'final_result.json'), 'w') as file:
         json.dump(result_dict, file)
+    
+    # delete all runs
+    shutil.rmtree(api._backend.get_runs_directory())

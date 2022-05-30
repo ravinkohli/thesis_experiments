@@ -168,10 +168,11 @@ if __name__ == '__main__':
     from itertools import product
     dataset_info = pd.read_csv(f'./{args.task_ids_file}.csv')
     save_folder = f"NEMO_thesis_{args.experiment_name}_{args.task_ids_file.split('_')[0]}"
-    seeds = [364, 438, 444, 875]  # random.sample(range(1000), 4)
+    seeds = [11, 364, 438] # , 444, 875]  # random.sample(range(1000), 4)
     for seed in seeds:
         params = parameters[args.experiment_name]
         values = list(product(*list(params.values())))
+        
         keys = list(params.keys())
         for value in values:
             needed_params = [f"{key}_{val}" for key, val in zip(keys, value)]
@@ -180,6 +181,7 @@ if __name__ == '__main__':
             os.makedirs(experiment_save_folder, exist_ok=True)
             experiment_details = {key: val for key, val in zip(keys, value)}
             experiment_details = {**experiment_details, **options}
+            experiment_details['seed'] = seed
             for task_id in dataset_info['Task_id']:
                 seconds_in_day = 60 * 60 * 24
                 seconds_in_hour = 60 * 60
