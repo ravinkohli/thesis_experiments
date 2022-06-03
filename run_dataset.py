@@ -226,7 +226,7 @@ if __name__ == '__main__':
     search_func_args = dict(
         get_smac_object_callback=get_smac_object,
         smac_scenario_args={
-            'runcount_limit': 3,
+            'runcount_limit': 1000,
         },
         min_budget=args.min_epochs,
         )
@@ -260,5 +260,5 @@ if __name__ == '__main__':
     shutil.rmtree(api._backend.get_runs_directory())
 
     # archive tmp folder
-    shutil.make_archive(os.path.join(os.path.dirname(api._backend.temporary_directory), 'tmp.zip'), 'zip', api._backend.temporary_directory)
+    shutil.make_archive(os.path.join(os.path.dirname(api._backend.temporary_directory), 'tmp'), 'zip', api._backend.temporary_directory)
     shutil.rmtree(api._backend.temporary_directory)
