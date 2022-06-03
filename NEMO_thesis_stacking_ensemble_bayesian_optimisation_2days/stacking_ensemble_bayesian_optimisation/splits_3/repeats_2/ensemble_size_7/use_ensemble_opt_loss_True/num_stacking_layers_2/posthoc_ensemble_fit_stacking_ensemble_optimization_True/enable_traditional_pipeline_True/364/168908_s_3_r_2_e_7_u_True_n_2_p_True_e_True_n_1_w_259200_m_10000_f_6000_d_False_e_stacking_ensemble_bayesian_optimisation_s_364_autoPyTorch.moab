@@ -1,7 +1,7 @@
 #!/bin/bash
 #MSUB -l walltime=84:00:00
 #MSUB -l nodes=1:ppn=1
-#MSUB -l pmem=1gb
+#MSUB -l pmem=10gb
 #MSUB -N 168908_s_3_r_2_e_7_u_True_n_2_p_True_e_True_n_1_w_259200_m_10000_f_6000_d_False_e_stacking_ensemble_bayesian_optimisation_s_364_autoPyTorch
 
 # Now call the program which does the work depending on the job id
