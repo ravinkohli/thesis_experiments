@@ -14,14 +14,6 @@ os.environ['MKL_NUM_THREADS'] = '1'
 warnings.simplefilter(action='ignore', category=UserWarning)
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
-import torch
-
-from autoPyTorch.api.tabular_classification import TabularClassificationTask
-from autoPyTorch.api.utils import get_autogluon_default_nn_config
-
-import numpy as np
-
-from smac.tae import StatusType
 
 def str2bool(v):
     if isinstance(v, bool):
@@ -136,6 +128,12 @@ print(options)
 
 
 if __name__ == '__main__':
+    import torch
+
+    from autoPyTorch.api.tabular_classification import TabularClassificationTask
+    from autoPyTorch.api.utils import get_autogluon_default_nn_config
+
+    import numpy as np
     from utilities import (
         get_data,
         get_smac_object,
