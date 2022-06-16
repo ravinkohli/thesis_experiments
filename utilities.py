@@ -56,11 +56,6 @@ def get_data(
     # uncomment only for np.arrays
 
     train_indices, test_indices = task.get_train_test_split_indices()
-    # AutoPyTorch fails when it is given a y DataFrame with False and True
-    # values and category as dtype. in its inner workings it uses sklearn
-    # which cannot detect the column type.
-    if isinstance(y[1], bool):
-        y = y.astype('bool')
 
     # uncomment only for np.arrays
 

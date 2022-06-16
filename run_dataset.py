@@ -5,6 +5,8 @@ import random
 import time
 import warnings
 import shutil
+import sys
+
 
 os.environ['OMP_NUM_THREADS'] = '1'
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
@@ -156,17 +158,19 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test, categorical_indicator, dataset_name, feat_type = get_data(
         task_id=args.task_id,
     )
+    if 'final_result.json' in os.listdir(args.exp_dir):
+        sys.exit(0)
 
     output_dir = os.path.expanduser(
         os.path.join(
             args.exp_dir,
-            f'out',
+            f'out_refit',
         )
     )
     temp_dir = os.path.expanduser(
         os.path.join(
             args.exp_dir,
-            f'tmp',
+            f'tmp_refit',
         )
     )
     search_space_updates = get_autogluon_default_nn_config(feat_type=feat_type)
