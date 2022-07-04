@@ -62,3 +62,13 @@ if __name__ == '__main__':
         potential_args = list(product(*potential_args))
         for potential_arg in potential_args:
             print(experiment_name, ''.join(potential_arg))
+
+
+
+# for p_values in product_values:
+#     name = 'sebo_'
+#     for key, val in zip(boolean_keys, p_values):
+#         name = name + f'{key}_{val}'
+#     dfs[name] = dfs['stacking_ensemble_optimisation'].copy()
+#     for key, val in zip(boolean_keys, p_values):
+#         dfs[name] = dfs[name].loc[dfs[name][key] == val]

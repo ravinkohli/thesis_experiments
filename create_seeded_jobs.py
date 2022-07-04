@@ -40,7 +40,7 @@ def get_nemo_jobfile_template(job_name, env_name, partition='bosch_cpu-cascadela
     header = f"""#!/bin/bash
 #MSUB -l walltime={hours}:{minutes}:00
 #MSUB -l nodes=1:ppn={n_cores}
-#MSUB -l pmem={int(memory/10000)}gb
+#MSUB -l pmem={int((memory*1.5)/1000)}gb
 #MSUB -N {job_name}
 
 # Now call the program which does the work depending on the job id
@@ -167,7 +167,7 @@ print(options)
 if __name__ == '__main__':
     from itertools import product
     dataset_info = pd.read_csv(f'./{args.task_ids_file}.csv')
-    save_folder = f"NEMO_thesis_{args.experiment_name}_{args.task_ids_file.split('_')[0]}"
+    save_folder = f"repeat_failed_jobs/NEMO_thesis_{args.experiment_name}_{args.task_ids_file.split('_')[0]}"
     seeds = [11, 364, 438] # , 444, 875]  # random.sample(range(1000), 4)
     for seed in seeds:
         params = parameters[args.experiment_name]

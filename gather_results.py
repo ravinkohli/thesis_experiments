@@ -3,7 +3,7 @@ import os
 import json
 
 file_data = list()
-folders = ['autopytorch_thesis_final', 'autopytorch_thesis_final_others', 'autopytorch_thesis_final_ensemble_opt', 'autopytorch_thesis']
+folders = ['autopytorch_thesis_final_2', 'autopytorch_thesis_final_others_2', 'autopytorch_thesis_final_ensemble_opt_2']  # , 'autopytorch_thesis']
 for folder in folders:
     for root, dirs, files in os.walk(f'/work/ws/nemo/fr_rk250-{folder}-0/small_tasks/'):
         for file in files:
