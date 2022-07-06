@@ -15,7 +15,7 @@ from smac.optimizer.smbo import SMBO
 
 from autoPyTorch.optimizer.utils import autoPyTorchSMBO
 from autoPyTorch.datasets.resampling_strategy import RepeatedCrossValTypes
-from autoPyTorch.ensemble.utils import EnsembleSelectionTypes
+from autoPyTorch.ensemble.utils import BaseLayerEnsembleSelectionTypes, StackingEnsembleSelectionTypes
 
 
 def get_compression_args():
@@ -76,10 +76,10 @@ def get_experiment_args(
     use_ensemble_opt_loss: bool = False,
     num_stacking_layers: int = 1,
     ensemble_size: int = 7,
-    posthoc_ensemble_fit_stacking_ensemble_optimization: bool = False,
+    posthoc_ensemble_fit: bool = False,
     enable_traditional_pipeline: bool = False
 ):
-    EXPERIMENT_ARGS = _get_experiment_args(splits, repeats, use_ensemble_opt_loss, num_stacking_layers, ensemble_size, posthoc_ensemble_fit_stacking_ensemble_optimization, enable_traditional_pipeline)
+    EXPERIMENT_ARGS = _get_experiment_args(splits, repeats, use_ensemble_opt_loss, num_stacking_layers, ensemble_size, posthoc_ensemble_fit, enable_traditional_pipeline)
     return EXPERIMENT_ARGS[experiment_name]
 
 def _get_experiment_args(
@@ -88,23 +88,38 @@ def _get_experiment_args(
     use_ensemble_opt_loss: bool = False,
     num_stacking_layers: int = 1,
     ensemble_size: int = 7,
-    posthoc_ensemble_fit_stacking_ensemble_optimization: bool = False,
+    posthoc_ensemble_fit: bool = False,
     enable_traditional_pipeline: bool = False
 ):
     EXPERIMENT_ARGS = {
-        'stacking_ensemble_bayesian_optimisation':
+        'ensemble_bayesian_optimisation':
             (
                 {
                     'resampling_strategy': RepeatedCrossValTypes.stratified_repeated_k_fold_cross_validation,
                     'resampling_strategy_args': {'num_splits': splits, 'num_repeats': repeats},
-                    'ensemble_method': EnsembleSelectionTypes.stacking_optimisation_ensemble,
+                    'base_ensemble_method': BaseLayerEnsembleSelectionTypes.ensemble_bayesian_optimisation,
                     'ensemble_size': ensemble_size,
                     'num_stacking_layers': num_stacking_layers,
                 },
                 { 
                     'smbo_class': autoPyTorchSMBO,
                     'use_ensemble_opt_loss': use_ensemble_opt_loss,
-                    'posthoc_ensemble_fit_stacking_ensemble_optimization': posthoc_ensemble_fit_stacking_ensemble_optimization,
+                    'posthoc_ensemble_fit': posthoc_ensemble_fit,
+                    'enable_traditional_pipeline': enable_traditional_pipeline
+                }
+            ),
+        'ensemble_iterative_hpo':
+            (
+                {
+                    'resampling_strategy': RepeatedCrossValTypes.stratified_repeated_k_fold_cross_validation,
+                    'resampling_strategy_args': {'num_splits': splits, 'num_repeats': repeats},
+                    'base_ensemble_method': BaseLayerEnsembleSelectionTypes.ensemble_iterative_hpo,
+                    'ensemble_size': ensemble_size,
+                    'num_stacking_layers': num_stacking_layers,
+                },
+                { 
+                    'search_func': 'run_iterative_hpo_ensemble_optimisation',
+                    'posthoc_ensemble_fit': posthoc_ensemble_fit,
                     'enable_traditional_pipeline': enable_traditional_pipeline
                 }
             ),
@@ -113,10 +128,43 @@ def _get_experiment_args(
                 {
                     'resampling_strategy': RepeatedCrossValTypes.stratified_repeated_k_fold_cross_validation,
                     'resampling_strategy_args': {'num_splits': splits, 'num_repeats': repeats},
-                    'ensemble_method': EnsembleSelectionTypes.ensemble_selection,
+                    'ensemble_method': BaseLayerEnsembleSelectionTypes.ensemble_selection,
                     'ensemble_size': ensemble_size,
                 },
                 {
+                    'enable_traditional_pipeline': enable_traditional_pipeline
+                }
+            ),
+        'ensemble_bayesian_optimisation_stacking':
+            (
+                {
+                    'resampling_strategy': RepeatedCrossValTypes.stratified_repeated_k_fold_cross_validation,
+                    'resampling_strategy_args': {'num_splits': splits, 'num_repeats': repeats},
+                    'base_ensemble_method': BaseLayerEnsembleSelectionTypes.ensemble_bayesian_optimisation,
+                    'stacking_ensemble_method': StackingEnsembleSelectionTypes.stacking_ensemble_bayesian_optimisation,
+                    'ensemble_size': ensemble_size,
+                    'num_stacking_layers': num_stacking_layers,
+                },
+                { 
+                    'smbo_class': autoPyTorchSMBO,
+                    'use_ensemble_opt_loss': use_ensemble_opt_loss,
+                    'posthoc_ensemble_fit': posthoc_ensemble_fit,
+                    'enable_traditional_pipeline': enable_traditional_pipeline
+                }
+            ),
+        'ensemble_iterative_hpo_stacking':
+            (
+                {
+                    'resampling_strategy': RepeatedCrossValTypes.stratified_repeated_k_fold_cross_validation,
+                    'resampling_strategy_args': {'num_splits': splits, 'num_repeats': repeats},
+                    'base_ensemble_method': BaseLayerEnsembleSelectionTypes.ensemble_iterative_hpo,
+                    'stacking_ensemble_method': StackingEnsembleSelectionTypes.stacking_ensemble_iterative_hpo,
+                    'ensemble_size': ensemble_size,
+                    'num_stacking_layers': num_stacking_layers,
+                },
+                { 
+                    'search_func': 'run_iterative_hpo_ensemble_optimisation',
+                    'posthoc_ensemble_fit': posthoc_ensemble_fit,
                     'enable_traditional_pipeline': enable_traditional_pipeline
                 }
             ),
@@ -125,7 +173,8 @@ def _get_experiment_args(
                 {
                     'resampling_strategy': RepeatedCrossValTypes.repeated_k_fold_cross_validation,
                     'resampling_strategy_args': {'num_splits': splits, 'num_repeats': repeats},
-                    'ensemble_method': EnsembleSelectionTypes.stacking_ensemble_selection_per_layer,
+                    'base_ensemble_method': BaseLayerEnsembleSelectionTypes.ensemble_selection,
+                    'stacking_ensemble_method': StackingEnsembleSelectionTypes.stacking_ensemble_selection_per_layer,
                     'ensemble_size': ensemble_size,
                     'num_stacking_layers': num_stacking_layers,
                 },
@@ -133,14 +182,47 @@ def _get_experiment_args(
                     'enable_traditional_pipeline': enable_traditional_pipeline
                 }
             ),
-        'stacking_repeat_models':
+        'ensemble_bayesian_optimisation_repeats':
             (
                 {
-                    'resampling_strategy': RepeatedCrossValTypes.repeated_k_fold_cross_validation,
+                    'resampling_strategy': RepeatedCrossValTypes.stratified_repeated_k_fold_cross_validation,
                     'resampling_strategy_args': {'num_splits': splits, 'num_repeats': repeats},
-                    'ensemble_method': EnsembleSelectionTypes.stacking_repeat_models,
+                    'base_ensemble_method': BaseLayerEnsembleSelectionTypes.ensemble_bayesian_optimisation,
+                    'stacking_ensemble_method': StackingEnsembleSelectionTypes.stacking_repeat_models,
                     'ensemble_size': ensemble_size,
                     'num_stacking_layers': num_stacking_layers,
+                },
+                { 
+                    'smbo_class': autoPyTorchSMBO,
+                    'use_ensemble_opt_loss': use_ensemble_opt_loss,
+                    'posthoc_ensemble_fit': posthoc_ensemble_fit,
+                    'enable_traditional_pipeline': enable_traditional_pipeline
+                }
+            ),
+        'ensemble_iterative_hpo_repeats':
+            (
+                {
+                    'resampling_strategy': RepeatedCrossValTypes.stratified_repeated_k_fold_cross_validation,
+                    'resampling_strategy_args': {'num_splits': splits, 'num_repeats': repeats},
+                    'base_ensemble_method': BaseLayerEnsembleSelectionTypes.ensemble_iterative_hpo,
+                    'stacking_ensemble_method': StackingEnsembleSelectionTypes.stacking_repeat_models,
+                    'ensemble_size': ensemble_size,
+                    'num_stacking_layers': num_stacking_layers,
+                },
+                { 
+                    'smbo_class': autoPyTorchSMBO,
+                    'posthoc_ensemble_fit': posthoc_ensemble_fit,
+                    'enable_traditional_pipeline': enable_traditional_pipeline
+                }
+            ),
+        'ensemble_selection_repeats':
+            (
+                {
+                    'resampling_strategy': RepeatedCrossValTypes.stratified_repeated_k_fold_cross_validation,
+                    'resampling_strategy_args': {'num_splits': splits, 'num_repeats': repeats},
+                    'ensemble_method': BaseLayerEnsembleSelectionTypes.ensemble_selection,
+                    'stacking_ensemble_method': StackingEnsembleSelectionTypes.stacking_repeat_models,
+                    'ensemble_size': ensemble_size,
                 },
                 {
                     'enable_traditional_pipeline': enable_traditional_pipeline
@@ -151,7 +233,7 @@ def _get_experiment_args(
                 {
                     'resampling_strategy': RepeatedCrossValTypes.repeated_k_fold_cross_validation,
                     'resampling_strategy_args': {'num_splits': splits, 'num_repeats': repeats},
-                    'ensemble_method': EnsembleSelectionTypes.stacking_autogluon,
+                    'ensemble_method': StackingEnsembleSelectionTypes.stacking_autogluon,
                     'ensemble_size': ensemble_size,
                     'num_stacking_layers': num_stacking_layers,
                 },

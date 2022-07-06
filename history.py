@@ -2,7 +2,7 @@ import pandas as pd
 from itertools import product
 values = [[True, False]]*3
 values.append([1,2])
-boolean_keys = ['posthoc_ensemble_fit_stacking_ensemble_optimization', 'enable_traditional_pipeline', 'use_ensemble_opt_loss']
+boolean_keys = ['posthoc_ensemble_fit', 'enable_traditional_pipeline', 'use_ensemble_opt_loss']
 boolean_keys.append('num_stacking_layers')
 xl_file = pd.ExcelFile('thesis_results.xlsx')
 dfs = {sheet_name: xl_file.parse(sheet_name) 

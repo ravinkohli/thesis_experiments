@@ -5,14 +5,23 @@ from itertools import product
 experiment_args = _get_experiment_args()
 
 parameters = {
-    'stacking_ensemble_bayesian_optimisation':
+    'ensemble_bayesian_optimisation':
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
         'ensemble_size': [7],
         'use_ensemble_opt_loss': [True, False],
-        'num_stacking_layers': [1, 2], # , 3],
-        'posthoc_ensemble_fit_stacking_ensemble_optimization': [True, False],
+        'num_stacking_layers': [1], #, 2], # , 3],
+        'posthoc_ensemble_fit': [True], # , False],
+        'enable_traditional_pipeline': [True, False],
+    },
+    'ensemble_iterative_hpo':
+    {
+        'splits': [3], # , 5],
+        'repeats': [2], # [1, 2],
+        'ensemble_size': [7],
+        'num_stacking_layers': [1], #, 2], # , 3],
+        'posthoc_ensemble_fit': [True], # , False],
         'enable_traditional_pipeline': [True, False],
     },
     'ensemble_selection':
@@ -20,6 +29,26 @@ parameters = {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
         'ensemble_size': [7],
+        'num_stacking_layers': [1], #, 2], # , 3],
+        'enable_traditional_pipeline': [True, False],
+    },
+    'ensemble_bayesian_optimisation_stacking':
+    {
+        'splits': [3], # , 5],
+        'repeats': [2], # [1, 2],
+        'ensemble_size': [7],
+        'use_ensemble_opt_loss': [True, False],
+        'num_stacking_layers': [2], # , 3],
+        'posthoc_ensemble_fit': [True], # , False],
+        'enable_traditional_pipeline': [True, False],
+    },
+    'ensemble_iterative_hpo_stacking':
+    {
+        'splits': [3], # , 5],
+        'repeats': [2], # [1, 2],
+        'ensemble_size': [7],
+        'num_stacking_layers': [2], # , 3],
+        'posthoc_ensemble_fit': [True], # , False],
         'enable_traditional_pipeline': [True, False],
     },
     'stacking_ensemble_selection_per_layer':
@@ -30,7 +59,26 @@ parameters = {
         'num_stacking_layers': [2], # , 3],
         'enable_traditional_pipeline': [True, False],
     },
-    'stacking_repeat_models':
+    'ensemble_bayesian_optimisation_repeats':
+    {
+        'splits': [3], # , 5],
+        'repeats': [2], # [1, 2],
+        'ensemble_size': [7],
+        'use_ensemble_opt_loss': [True, False],
+        'num_stacking_layers': [2], # , 3],
+        'posthoc_ensemble_fit': [True], # , False],
+        'enable_traditional_pipeline': [True, False],
+    },
+    'ensemble_iterative_hpo_repeats':
+    {
+        'splits': [3], # , 5],
+        'repeats': [2], # [1, 2],
+        'ensemble_size': [7],
+        'num_stacking_layers': [2], # , 3],
+        'posthoc_ensemble_fit': [True], # , False],
+        'enable_traditional_pipeline': [True, False],
+    },
+    'ensemble_selection_repeats':
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],

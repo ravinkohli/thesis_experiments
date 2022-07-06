@@ -108,7 +108,12 @@ parser.add_argument(
     default=7
 )
 parser.add_argument(
-    '--posthoc_ensemble_fit_stacking_ensemble_optimization',
+    '--posthoc_ensemble_fit',
+    type=str2bool,
+    default=False
+)
+parser.add_argument(
+    '--warmstart',
     type=str2bool,
     default=False
 )
@@ -158,22 +163,20 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test, categorical_indicator, dataset_name, feat_type = get_data(
         task_id=args.task_id,
     )
-    if 'final_result.json' in os.listdir(args.exp_dir):
-        sys.exit(0)
 
     output_dir = os.path.expanduser(
         os.path.join(
             args.exp_dir,
-            f'out_refit',
+            f'out',
         )
     )
     temp_dir = os.path.expanduser(
         os.path.join(
             args.exp_dir,
-            f'tmp_refit',
+            f'tmp',
         )
     )
-    search_space_updates = get_autogluon_default_nn_config(feat_type=feat_type)
+    search_space_updates = get_autogluon_default_nn_config(feat_types=feat_type)
     init_args, search_args = get_experiment_args(
         args.experiment_name,
         splits=args.splits,
@@ -181,7 +184,7 @@ if __name__ == '__main__':
         use_ensemble_opt_loss=args.use_ensemble_opt_loss,
         num_stacking_layers=args.num_stacking_layers,
         ensemble_size=args.ensemble_size,
-        posthoc_ensemble_fit_stacking_ensemble_optimization=args.posthoc_ensemble_fit_stacking_ensemble_optimization,
+        posthoc_ensemble_fit=args.posthoc_ensemble_fit,
         enable_traditional_pipeline=args.enable_traditional_pipeline,
     )
     print(f"init_args: {init_args}, search_args: {search_args}")
@@ -197,7 +200,6 @@ if __name__ == '__main__':
         delete_output_folder_after_terminate=False,
         seed=args.seed,
         search_space_updates=search_space_updates,
-        feat_type=feat_type,
         **init_args
     )
 
@@ -214,6 +216,7 @@ if __name__ == '__main__':
         y_train=y_train.copy(),
         X_test=X_test.copy(),
         y_test=y_test.copy(),
+        feat_types=feat_type,
         dataset_name=dataset_name,
         optimize_metric='balanced_accuracy',
         total_walltime_limit=args.wall_time,
@@ -231,8 +234,9 @@ if __name__ == '__main__':
             'runcount_limit': 1000,
         },
         min_budget=args.min_epochs,
+        warmstart=args.warmstart
         )
-    if search_func == "search":
+    if search_func in ["search", "run_iterative_hpo_ensemble_optimisation"]:
         common_args.update(search_func_args)
     getattr(api, search_func)(**common_args)
 
