@@ -9,17 +9,17 @@ parameters = {
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
-        'ensemble_size': [7],
+        'ensemble_size': [5],
         'use_ensemble_opt_loss': [True, False],
         'num_stacking_layers': [1], #, 2], # , 3],
-        'posthoc_ensemble_fit': [True], # , False],
+        'posthoc_ensemble_fit': [True],  # , False],
         'enable_traditional_pipeline': [True, False],
     },
     'ensemble_iterative_hpo':
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
-        'ensemble_size': [7],
+        'ensemble_size': [5],
         'num_stacking_layers': [1], #, 2], # , 3],
         'posthoc_ensemble_fit': [True], # , False],
         'enable_traditional_pipeline': [True, False],
@@ -28,7 +28,7 @@ parameters = {
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
-        'ensemble_size': [7],
+        'ensemble_size': [5],
         'num_stacking_layers': [1], #, 2], # , 3],
         'enable_traditional_pipeline': [True, False],
     },
@@ -36,8 +36,8 @@ parameters = {
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
-        'ensemble_size': [7],
-        'use_ensemble_opt_loss': [True, False],
+        'ensemble_size': [5],
+        'use_ensemble_opt_loss': [True], # , False],
         'num_stacking_layers': [2], # , 3],
         'posthoc_ensemble_fit': [True], # , False],
         'enable_traditional_pipeline': [True, False],
@@ -46,7 +46,7 @@ parameters = {
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
-        'ensemble_size': [7],
+        'ensemble_size': [5],
         'num_stacking_layers': [2], # , 3],
         'posthoc_ensemble_fit': [True], # , False],
         'enable_traditional_pipeline': [True, False],
@@ -55,7 +55,7 @@ parameters = {
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
-        'ensemble_size': [7],
+        'ensemble_size': [5],
         'num_stacking_layers': [2], # , 3],
         'enable_traditional_pipeline': [True, False],
     },
@@ -63,8 +63,8 @@ parameters = {
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
-        'ensemble_size': [7],
-        'use_ensemble_opt_loss': [True, False],
+        'ensemble_size': [5],
+        'use_ensemble_opt_loss': [True],  # , False],
         'num_stacking_layers': [2], # , 3],
         'posthoc_ensemble_fit': [True], # , False],
         'enable_traditional_pipeline': [True, False],
@@ -73,7 +73,7 @@ parameters = {
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
-        'ensemble_size': [7],
+        'ensemble_size': [5],
         'num_stacking_layers': [2], # , 3],
         'posthoc_ensemble_fit': [True], # , False],
         'enable_traditional_pipeline': [True, False],
@@ -82,7 +82,7 @@ parameters = {
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
-        'ensemble_size': [7],
+        'ensemble_size': [5],
         'num_stacking_layers': [2], # , 3],
         'enable_traditional_pipeline': [True, False],
     },
@@ -90,6 +90,7 @@ parameters = {
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
+        'ensemble_size': [5],
         'num_stacking_layers': [2], # , 3],
     },
 }

@@ -1,0 +1,12 @@
+#!/bin/bash
+#MSUB -l walltime=84:00:00
+#MSUB -l nodes=1:ppn=1
+#MSUB -l pmem=15gb
+#MSUB -N 10101_s_3_r_2_e_5_n_2_e_True_n_1_w_259200_m_10000_f_6000_d_False_e_stacking_ensemble_selection_per_layer_s_106_autoPyTorch
+
+# Now call the program which does the work depending on the job id
+source ~/anaconda3/bin/activate thesis_exp-env
+JOBID=(${MOAB_JOBID //[/})
+    
+python /home/fr/fr_fr/fr_rk250/thesis_experiments/run_dataset.py --task_id 10101 --splits 3 --repeats 2 --ensemble_size 5 --num_stacking_layers 2 --enable_traditional_pipeline True --nr_workers 1 --wall_time 259200 --mem_limit 10000 --func_eval_time 6000 --dataset_compression False --experiment_name stacking_ensemble_selection_per_layer --seed 106 --min_epochs 12 --epochs 50 --exp_dir /work/ws/nemo/fr_rk250-autopytorch_thesis-0/small_tasks/splits_3/repeats_2/ensemble_size_5/num_stacking_layers_2/enable_traditional_pipeline_True/nr_workers_1/wall_time_259200/mem_limit_10000/func_eval_time_6000/dataset_compression_False/experiment_name_stacking_ensemble_selection_per_layer/seed_106/10101_s_3_r_2_e_5_n_2_e_True_n_1_w_259200_m_10000_f_6000_d_False_e_stacking_ensemble_selection_per_layer_s_106_autoPyTorch
+
