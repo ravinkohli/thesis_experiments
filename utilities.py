@@ -220,7 +220,7 @@ def _get_experiment_args(
                 {
                     'resampling_strategy': RepeatedCrossValTypes.stratified_repeated_k_fold_cross_validation,
                     'resampling_strategy_args': {'num_splits': splits, 'num_repeats': repeats},
-                    'ensemble_method': BaseLayerEnsembleSelectionTypes.ensemble_selection,
+                    'base_ensemble_method': BaseLayerEnsembleSelectionTypes.ensemble_selection,
                     'stacking_ensemble_method': StackingEnsembleSelectionTypes.stacking_repeat_models,
                     'ensemble_size': ensemble_size,
                 },
@@ -233,7 +233,8 @@ def _get_experiment_args(
                 {
                     'resampling_strategy': RepeatedCrossValTypes.repeated_k_fold_cross_validation,
                     'resampling_strategy_args': {'num_splits': splits, 'num_repeats': repeats},
-                    'ensemble_method': StackingEnsembleSelectionTypes.stacking_autogluon,
+                    'base_ensemble_method': BaseLayerEnsembleSelectionTypes.ensemble_autogluon,
+                    'stacking_ensemble_method': StackingEnsembleSelectionTypes.stacking_autogluon,
                     'ensemble_size': ensemble_size,
                     'num_stacking_layers': num_stacking_layers,
                 },
