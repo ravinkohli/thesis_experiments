@@ -268,3 +268,5 @@ if __name__ == '__main__':
     # archive tmp folder
     shutil.make_archive(os.path.join(os.path.dirname(api._backend.temporary_directory), 'tmp'), 'zip', api._backend.temporary_directory)
     shutil.rmtree(api._backend.temporary_directory)
+    shutil.rmtree(api._backend.output_directory)
+
