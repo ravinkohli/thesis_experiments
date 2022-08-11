@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import pickle
 import random
 import time
 import warnings
@@ -164,6 +165,9 @@ if __name__ == '__main__':
         task_id=args.task_id,
     )
 
+    if os.path.exists(args.exp_dir) and 'final_result.json' in os.listdir(args.exp_dir):
+        sys.exit(0)
+
     output_dir = os.path.expanduser(
         os.path.join(
             args.exp_dir,
@@ -261,6 +265,8 @@ if __name__ == '__main__':
 
     with open(os.path.join(args.exp_dir, 'final_result.json'), 'w') as file:
         json.dump(result_dict, file)
+    
+    pickle.dump(api, open(os.path.join(args.exp_dir, 'estimator.pkl'), 'wb'))
     
     # delete all runs
     shutil.rmtree(api._backend.get_runs_directory())
