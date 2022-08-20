@@ -40,7 +40,7 @@ def get_nemo_jobfile_template(job_name, env_name, partition='bosch_cpu-cascadela
     header = f"""#!/bin/bash
 #MSUB -l walltime={hours}:{minutes}:00
 #MSUB -l nodes=1:ppn={n_cores}
-#MSUB -l pmem={int((memory*2)/1000)}gb
+#MSUB -l pmem={int((memory*2.5)/1000)}gb
 #MSUB -N {job_name}
 
 # Now call the program which does the work depending on the job id

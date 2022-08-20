@@ -12,8 +12,8 @@ parameters = {
         'ensemble_size': [5],
         'use_ensemble_opt_loss': [True, False],
         'num_stacking_layers': [1], #, 2], # , 3],
-        'posthoc_ensemble_fit': [True],  # , False],
-        'enable_traditional_pipeline': [True, False],
+        'posthoc_ensemble_fit': [False],
+        'enable_traditional_pipeline': [False],
     },
     'ensemble_iterative_hpo':
     {
@@ -21,7 +21,8 @@ parameters = {
         'repeats': [2], # [1, 2],
         'ensemble_size': [5],
         'num_stacking_layers': [1], #, 2], # , 3],
-        'posthoc_ensemble_fit': [True], # , False],
+        'posthoc_ensemble_fit': [False], # , False],
+        'warmstart': [True],
         'enable_traditional_pipeline': [True, False],
     },
     'ensemble_selection':
@@ -49,6 +50,7 @@ parameters = {
         'ensemble_size': [5],
         'num_stacking_layers': [2], # , 3],
         'posthoc_ensemble_fit': [True], # , False],
+        'warmstart': [True],
         'enable_traditional_pipeline': [True, False],
     },
     'stacking_ensemble_selection_per_layer':
@@ -76,6 +78,7 @@ parameters = {
         'ensemble_size': [5],
         'num_stacking_layers': [2], # , 3],
         'posthoc_ensemble_fit': [True], # , False],
+        'warmstart': [True],
         'enable_traditional_pipeline': [True, False],
     },
     'ensemble_selection_repeats':
