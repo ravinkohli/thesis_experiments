@@ -140,7 +140,7 @@ if __name__ == '__main__':
     import torch
 
     from autoPyTorch.api.tabular_classification import TabularClassificationTask
-    from autoPyTorch.api.utils import get_autogluon_default_nn_config
+    from autoPyTorch.api.utils import get_autogluon_default_nn_config_space
 
     import numpy as np
     from utilities import (
@@ -181,7 +181,7 @@ if __name__ == '__main__':
             f'tmp',
         )
     )
-    search_space_updates = get_autogluon_default_nn_config(feat_types=feat_type)
+    search_space_updates = get_autogluon_default_nn_config_space(feat_types=feat_type)
     init_args, search_args = get_experiment_args(
         args.experiment_name,
         splits=args.splits,
