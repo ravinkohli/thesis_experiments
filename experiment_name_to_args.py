@@ -96,6 +96,15 @@ parameters = {
         'ensemble_size': [5],
         'num_stacking_layers': [2], # , 3],
     },
+    'stacking_fine_tuning':
+    {
+        'splits': [3], # , 5],
+        'repeats': [2], # [1, 2],
+        'ensemble_size': [5],
+        'num_stacking_layers': [2], #, 2], # , 3],
+        # 'posthoc_ensemble_fit': [False], # , False],
+        'enable_traditional_pipeline': [False]  # True, ],
+    },
 }
 
 
