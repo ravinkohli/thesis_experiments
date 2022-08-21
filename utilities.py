@@ -15,7 +15,7 @@ from smac.optimizer.smbo import SMBO
 
 from autoPyTorch.optimizer.utils import autoPyTorchSMBO
 from autoPyTorch.datasets.resampling_strategy import RepeatedCrossValTypes
-from autoPyTorch.ensemble.utils import BaseLayerEnsembleSelectionTypes, StackingEnsembleSelectionTypes
+from autoPyTorch.ensemble.ensemble_selection_types import BaseLayerEnsembleSelectionTypes, StackingEnsembleSelectionTypes
 
 
 def get_compression_args():
@@ -240,6 +240,22 @@ def _get_experiment_args(
                 },
                 {
                     'search_func': 'run_autogluon_stacking'
+                }
+            ),
+        'stacking_fine_tuning':
+            (
+                {
+                    'resampling_strategy': RepeatedCrossValTypes.stratified_repeated_k_fold_cross_validation,
+                    'resampling_strategy_args': {'num_splits': splits, 'num_repeats': repeats},
+                    'base_ensemble_method': BaseLayerEnsembleSelectionTypes.ensemble_fine_tune,
+                    'stacking_ensemble_method': StackingEnsembleSelectionTypes.stacking_fine_tuning,
+                    'ensemble_size': ensemble_size,
+                    'num_stacking_layers': num_stacking_layers,
+                },
+                { 
+                    'posthoc_ensemble_fit': posthoc_ensemble_fit,
+                    'enable_traditional_pipeline': enable_traditional_pipeline,
+                    'search_func': 'run_fine_tune_stacked_ensemble'
                 }
             ),
         }

@@ -102,8 +102,8 @@ parameters = {
         'repeats': [2], # [1, 2],
         'ensemble_size': [5],
         'num_stacking_layers': [2], #, 2], # , 3],
-        # 'posthoc_ensemble_fit': [False], # , False],
-        'enable_traditional_pipeline': [False]  # True, ],
+        'posthoc_ensemble_fit': [False, True], # , False],
+        'enable_traditional_pipeline': [False, True]# , ],
     },
 }
 

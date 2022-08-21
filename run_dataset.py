@@ -3,6 +3,7 @@ import json
 import os
 import pickle
 import random
+from re import search
 import time
 import warnings
 import shutil
@@ -240,8 +241,11 @@ if __name__ == '__main__':
         min_budget=args.min_epochs,
         warmstart=args.warmstart
         )
-    if search_func in ["search", "run_iterative_hpo_ensemble_optimisation"]:
+    if search_func in ["search", "run_iterative_hpo_ensemble_optimisation", "run_fine_tune_stacked_ensemble"]:
         common_args.update(search_func_args)
+    if search_func in ['run_fine_tune_stacked_ensemble']:
+        common_args.pop('warmstart', None)
+
     getattr(api, search_func)(**common_args)
 
     train_preds = api.predict(X_train)
