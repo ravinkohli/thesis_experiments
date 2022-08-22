@@ -4,7 +4,7 @@ values = [[True, False]]*4
 values.append([1,2])
 boolean_keys = ['posthoc_ensemble_fit', 'enable_traditional_pipeline', 'use_ensemble_opt_loss', 'warmstart']
 boolean_keys.append('num_stacking_layers')
-xl_file = pd.ExcelFile('gathered_results_proper.xlsx')
+xl_file = pd.ExcelFile('gathered_results_proper_2.xlsx')
 dfs = {sheet_name: xl_file.parse(sheet_name) 
           for sheet_name in xl_file.sheet_names}
 # sebo = []
@@ -76,6 +76,6 @@ for key in list(dfs.keys()):
     #     dfs[key][key] = dfs[key]['test balanced accuracy']
     #     dfs[key] = dfs[key].drop(['test balanced accuracy'], axis=1)
 
-pd.concat([val for key, val in dfs.items() if 'mean' in key], axis=1).fillna(0).to_csv('combined_results_mean_new.csv')
-pd.concat([val for key, val in dfs.items() if 'std' in key], axis=1).fillna(0).to_csv('combined_results_std_new.csv')
+pd.concat([val for key, val in dfs.items() if 'mean' in key], axis=1).fillna(0).to_csv('combined_results_mean_new_2(22.08).csv')
+pd.concat([val for key, val in dfs.items() if 'std' in key], axis=1).fillna(0).to_csv('combined_results_std_new_2(22.08).csv')
 

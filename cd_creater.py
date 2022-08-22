@@ -3,7 +3,7 @@ import os
 
 import pandas as pd
 
-from cd_creater_utils import draw_cd_diagram
+from cd_creater_utils import ALGORITHM_COLUMN_NAME, PERFORMANCE_METRIC_COLUMN_NAME, draw_cd_diagram
 
 sets = {
     'num_stacking_layers_2': ['ebos_pef_T_etp_T_ueol_T_w_F_nsl_2', 'ebos_pef_T_etp_F_ueol_T_w_F_nsl_2',
@@ -20,7 +20,8 @@ sets = {
     'eih': [
  'eihs_pef_T_etp_T_ueol_F_w_F_nsl_2', 'eihs_pef_T_etp_F_ueol_F_w_F_nsl_2',
  'eihr_pef_T_etp_T_ueol_F_w_F_nsl_2', 'eihr_pef_T_etp_F_ueol_F_w_F_nsl_2',
- 'eih_pef_T_etp_T_ueol_F_w_F_nsl_1', 'eih_pef_T_etp_F_ueol_F_w_F_nsl_1'],
+ 'eih_pef_T_etp_T_ueol_F_w_F_nsl_1', 'eih_pef_T_etp_F_ueol_F_w_F_nsl_1',
+ 'eih_pef_T_etp_T_ueol_F_w_T_nsl_1', 'eih_pef_T_etp_F_ueol_F_w_T_nsl_1'],
     'es': [
  'ess_pef_F_etp_T_ueol_F_w_F_nsl_2', 'ess_pef_F_etp_F_ueol_F_w_F_nsl_2', 'esr_pef_F_etp_T_ueol_F_w_F_nsl_2',
  'esr_pef_F_etp_F_ueol_F_w_F_nsl_2', 'es_pef_F_etp_T_ueol_F_w_F_nsl_1',
@@ -39,7 +40,9 @@ sets = {
  'ebo_pef_T_etp_T_ueol_T_w_F_nsl_1', 'ebo_pef_T_etp_T_ueol_F_w_F_nsl_1',
  'ebo_pef_T_etp_F_ueol_T_w_F_nsl_1', 'ebo_pef_T_etp_F_ueol_F_w_F_nsl_1',
  'es_pef_F_etp_T_ueol_F_w_F_nsl_1',
- 'es_pef_F_etp_F_ueol_F_w_F_nsl_1'],
+ 'es_pef_F_etp_F_ueol_F_w_F_nsl_1',
+  'eih_pef_T_etp_T_ueol_F_w_T_nsl_1', 'eih_pef_T_etp_F_ueol_F_w_T_nsl_1'],
+
     'all': ['ebos_pef_T_etp_T_ueol_T_w_F_nsl_2', 'ebos_pef_T_etp_F_ueol_T_w_F_nsl_2',
  'ebor_pef_T_etp_T_ueol_T_w_F_nsl_2', 'ebor_pef_T_etp_F_ueol_T_w_F_nsl_2',
  'eihs_pef_T_etp_T_ueol_F_w_F_nsl_2', 'eihs_pef_T_etp_F_ueol_F_w_F_nsl_2',
@@ -50,7 +53,9 @@ sets = {
  'ess_pef_F_etp_T_ueol_F_w_F_nsl_2', 'ess_pef_F_etp_F_ueol_F_w_F_nsl_2',
  'sa_pef_F_etp_F_ueol_F_w_F_nsl_2', 'esr_pef_F_etp_T_ueol_F_w_F_nsl_2',
  'esr_pef_F_etp_F_ueol_F_w_F_nsl_2', 'es_pef_F_etp_T_ueol_F_w_F_nsl_1',
- 'es_pef_F_etp_F_ueol_F_w_F_nsl_1'],
+ 'es_pef_F_etp_F_ueol_F_w_F_nsl_1',
+   'eih_pef_T_etp_T_ueol_F_w_T_nsl_1', 'eih_pef_T_etp_F_ueol_F_w_T_nsl_1'],
+
     'etp_T': 
 ['ebos_pef_T_etp_T_ueol_T_w_F_nsl_2',
  'ebor_pef_T_etp_T_ueol_T_w_F_nsl_2',
@@ -117,9 +122,9 @@ print(options)
 
 if __name__ == '__main__':
 
-    df_perf = pd.read_csv(f'{args.csv}.csv',index_col=False, sep=';')
+    df_perf = pd.read_csv(f'{args.csv}.csv',index_col=False, sep=',')
 
-    df_perf['test_accuracy'] *= 100
+    df_perf[PERFORMANCE_METRIC_COLUMN_NAME] *= 100
 
-    df_perf = df_perf.iloc[test_method(df_perf['method'], sets[args.set])]
+    df_perf = df_perf.iloc[test_method(df_perf[ALGORITHM_COLUMN_NAME], sets[args.set])]
     draw_cd_diagram(df_perf=df_perf, title='Balanced Accuracy', labels=True, figname=os.path.join('cd_diagram_plots_new', f"{args.csv.split('/')[-1]}_{args.set}"))
