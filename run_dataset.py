@@ -165,8 +165,11 @@ if __name__ == '__main__':
         task_id=args.task_id,
     )
 
-    if os.path.exists(args.exp_dir) and 'final_result.json' in os.listdir(args.exp_dir):
-        sys.exit(0)
+    if os.path.exists(args.exp_dir):
+        if 'final_result.json' in os.listdir(args.exp_dir):
+            sys.exit(0)
+        else:
+            shutil.rmtree(args.exp_dir)
 
     output_dir = os.path.expanduser(
         os.path.join(
