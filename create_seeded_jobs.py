@@ -167,7 +167,7 @@ print(options)
 if __name__ == '__main__':
     from itertools import product
     dataset_info = pd.read_csv(f'./{args.task_ids_file}.csv')
-    save_folder = f"jobs/NEMO_thesis_{args.experiment_name}_{args.task_ids_file.split('_')[0]}"
+    save_folder = f"ensemble_size_11_jobs/NEMO_thesis_{args.experiment_name}_{args.task_ids_file.split('_')[0]}"
     seeds = [106, 355, 839] # random.sample(range(1000), 4)
     for seed in seeds:
         params = parameters[args.experiment_name]

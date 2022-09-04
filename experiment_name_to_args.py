@@ -9,7 +9,7 @@ parameters = {
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
-        'ensemble_size': [5],
+        'ensemble_size': [11],
         'use_ensemble_opt_loss': [True, False],
         'num_stacking_layers': [1], #, 2], # , 3],
         'posthoc_ensemble_fit': [False],
@@ -19,7 +19,7 @@ parameters = {
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
-        'ensemble_size': [5],
+        'ensemble_size': [11],
         'num_stacking_layers': [1], #, 2], # , 3],
         'posthoc_ensemble_fit': [False], # , False],
         'warmstart': [True],
@@ -29,7 +29,7 @@ parameters = {
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
-        'ensemble_size': [5],
+        'ensemble_size': [11],
         'num_stacking_layers': [1], #, 2], # , 3],
         'enable_traditional_pipeline': [True, False],
     },
@@ -37,7 +37,7 @@ parameters = {
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
-        'ensemble_size': [5],
+        'ensemble_size': [11],
         'use_ensemble_opt_loss': [True], # , False],
         'num_stacking_layers': [2], # , 3],
         'posthoc_ensemble_fit': [True], # , False],
@@ -47,7 +47,7 @@ parameters = {
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
-        'ensemble_size': [5],
+        'ensemble_size': [11],
         'num_stacking_layers': [2], # , 3],
         'posthoc_ensemble_fit': [True], # , False],
         'warmstart': [True],
@@ -57,7 +57,7 @@ parameters = {
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
-        'ensemble_size': [5],
+        'ensemble_size': [11],
         'num_stacking_layers': [2], # , 3],
         'enable_traditional_pipeline': [True, False],
     },
@@ -65,7 +65,7 @@ parameters = {
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
-        'ensemble_size': [5],
+        'ensemble_size': [11],
         'use_ensemble_opt_loss': [True],  # , False],
         'num_stacking_layers': [2], # , 3],
         'posthoc_ensemble_fit': [True], # , False],
@@ -75,7 +75,7 @@ parameters = {
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
-        'ensemble_size': [5],
+        'ensemble_size': [11],
         'num_stacking_layers': [2], # , 3],
         'posthoc_ensemble_fit': [True], # , False],
         'warmstart': [True],
@@ -85,7 +85,7 @@ parameters = {
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
-        'ensemble_size': [5],
+        'ensemble_size': [11],
         'num_stacking_layers': [2], # , 3],
         'enable_traditional_pipeline': [True, False],
     },
@@ -93,7 +93,7 @@ parameters = {
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
-        'ensemble_size': [5],
+        'ensemble_size': [11],
         'num_stacking_layers': [2], # , 3],
     },
 }
