@@ -1,6 +1,6 @@
 import pandas as pd
 
-result_df = pd.read_csv('final_thesis_results/gathered_results_proper.csv')
+result_df = pd.read_csv('final_thesis_results/gathered_results_size_11.csv')
 
 result_df = result_df.astype({'experiment_name': 'category'})
 all_experiment_names = result_df['experiment_name'].cat.categories
