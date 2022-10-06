@@ -85,19 +85,19 @@ def run(config):
     log.info(f"Columns dtypes:\n{config['train'].dtypes}")
     params = get_hyperparameter_config('default')
 
-    params['NN_TORCH']['num_epochs'] = config['max_epochs']
+    params['NN_TORCH']['num_epochs'] = config['epochs']
     params.pop('FASTAI')
     log.info(f"Models to use:\n{json.dumps(params, indent=4, sort_keys=True)}")
 
     predictor = TabularPredictor(
         label=config['label'],
         eval_metric=perf_metric.name,
-        path=config['output_dir']
+        path=config['exp_dir']
     ).fit(
         train_data=config['train'],
         # Enable stacking!
         presets='best_quality',
-        time_limit=config["max_runtime_seconds"],
+        time_limit=config["wall_time"],
         hyperparameters=params,
         num_bag_folds=config['num_bag_folds'],
         num_bag_sets=config['num_bag_sets'],
@@ -144,12 +144,17 @@ if __name__ == '__main__':
         default=3917,
     )
     parser.add_argument(
-        '--max_runtime_seconds',
+        '--wall_time',
         type=int,
         default=1800,
     )
     parser.add_argument(
-        '--max_epochs',
+        '--epochs',
+        type=int,
+        default=50,
+    )
+    parser.add_argument(
+        '--min_epochs',
         type=int,
         default=50,
     )
@@ -174,40 +179,68 @@ if __name__ == '__main__':
         default=11,
     )
     parser.add_argument(
-        '--output_dir',
+        '--exp_dir',
         type=str,
         default='./autogluon_run/'
     )
+    parser.add_argument(
+        '--func_eval_time',
+        type=int,
+        default=100800,
+    )
+    parser.add_argument(
+        '--dataset_compression',
+        help='whether to use search space updates from the reg cocktails paper',
+        default=False,
+    )
+    parser.add_argument(
+        '--experiment_name',
+        type=str,
+        default='stacked_ensemble'
+    )
+    parser.add_argument(
+        '--nr_workers',
+        type=int,
+        default=1,
+    )
+    parser.add_argument(
+        '--mem_limit',
+        type=int,
+        default=8000,
+    )
     args = parser.parse_args()
 
-    output_dir = os.path.join(
-        args.output_dir,
+    exp_dir = os.path.join(
+        args.exp_dir,
         f'{args.seed}',
         f'{args.task_id}',
     )
-    os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(exp_dir, exist_ok=True)
     # Log to a file
     logFormatter = logging.Formatter(
         "%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
 
-    fileHandler = logging.FileHandler(os.path.join(output_dir, 'info.log'))
+    fileHandler = logging.FileHandler(os.path.join(exp_dir, 'info.log'))
     fileHandler.setFormatter(logFormatter)
     log.addHandler(fileHandler)
 
     # Build a configuration to run the experiments
-    config = {'task_id': args.task_id, 'output_dir': output_dir}
+    config = {'task_id': args.task_id, 'exp_dir': exp_dir}
 
     # Add the train and test data
     config.update(get_data(task_id=args.task_id))
 
+    options = vars(args)
+    config.update(**options)
     config.update({
         'metric': 'balacc',
         'type': 'classification',
-        'max_runtime_seconds': args.max_runtime_seconds,
+        'wall_time': args.wall_time,
         'num_bag_sets': args.num_bag_sets,
         'num_bag_folds': args.num_bag_folds,
         'num_stack_levels': args.num_stacking_layers-1,
-        'max_epochs': args.max_epochs
+        'epochs': args.epochs,
+        'experiment_name': 'autogluon_original_stacking'
     })
 
     # Run the example -- and also warn the user about autogluon settings
@@ -216,9 +249,9 @@ if __name__ == '__main__':
     predictions, probabilities, truth, predictor = run(config)
 
     # Store the predictions if things go south
-    with open(os.path.join(output_dir, f"predictions.{args.task_id}.pickle"), 'wb') as handle:
+    with open(os.path.join(exp_dir, f"predictions.{args.task_id}.pickle"), 'wb') as handle:
         pickle.dump(predictions, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    with open(os.path.join(output_dir, f"truth.{args.task_id}.pickle"), 'wb') as handle:
+    with open(os.path.join(exp_dir, f"truth.{args.task_id}.pickle"), 'wb') as handle:
         pickle.dump(truth, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     predictor.save()
@@ -243,7 +276,7 @@ if __name__ == '__main__':
     config.pop('test')
     config['score'] = score
     task_csv_dir = os.path.join(
-        output_dir,
+        exp_dir,
         'results.csv',
     )
     pd.DataFrame([config]).to_csv(

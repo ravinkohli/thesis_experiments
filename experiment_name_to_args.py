@@ -96,6 +96,11 @@ parameters = {
         'ensemble_size': [11],
         'num_stacking_layers': [2], # , 3],
     },
+    'autogluon_original_stacking':{
+        'num_bag_sets': [2],
+        'num_bag_folds': [3],
+        'num_stacking_layers': [2],
+    }
 }
 
 
@@ -116,6 +121,11 @@ if __name__ == '__main__':
             print(experiment_name, ''.join(potential_arg))
 
 
+
+
+# python run_autogluon.py --task_id 10101 --num_bag_sets 2 --num_bag_folds 3 --num_stacking_layers 2 --max_epochs 50 --nr_workers 1 --wall_time 1800 --mem_limit 10000 --func_eval_time 6000 --dataset_compression False --experiment_name autogluon_original_stacking --seed 106 --min_epochs 12 --epochs 50 --exp_dir ./autogluon_runs/task_id
+
+# python run_autogluon.py --t ask_id 3 --num_bag_sets 2 --num_bag_folds 3 --num_stacking_layers 2 --nr_workers 1 --wall_time 1800 --mem_limit 10000 --func_eval_time 6000 --dataset_compression False --experiment_name autogluon_original_stacking --seed 355 --min_epochs 12 --epochs 50 --exp_dir ./autogluon_runs/task_id
 
 # for p_values in product_values:
 #     name = 'sebo_'
