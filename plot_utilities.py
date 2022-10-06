@@ -75,12 +75,14 @@ def incumbent_plot(
     )
 
     if title is not None:
-        ax.set_title(title) # [title])
+        ax.set_title(title, fontsize=18) # [title])
     if xlabel is not None:
-        ax.set_xlabel(xlabel)
+        ax.set_xlabel(xlabel, fontsize=18)
     if ylabel is not None:
-        ax.set_ylabel(ylabel)
+        ax.set_ylabel(ylabel, fontsize=18)
     ax.grid(True, which="both", ls="-", alpha=0.8)
+
+    ax.tick_params(axis='both', which='major', labelsize=18)
 
     if log:
         ax.set_xscale("log")
@@ -128,8 +130,113 @@ def set_general_plot_style():
 
 
 
+def replace_name(task_id):
+    dataset_df = pd.read_csv('dataset_collection.csv')
+    name = dataset_df[dataset_df['OpenML Task Id'] == int(task_id)]['Dataset Name'].item()
+    return name
 
 
+def make_overfit_plot(out_dir, strategies, name_to_label, color_marker, best_test=True):
+    if best_test:
+        overfit_df = pd.read_csv('final_thesis_results/ensemble_size_5/all/combined_results_mean_test_all_overfit.csv').set_index('Dataset')
+        not_needed_column_names = [column_name for column_name in overfit_df.columns if column_name not in strategies]
+            # not_needed_column_names.pop('task_id')
+            
+        # print(strategies, "\n", not_needed_column_names)
+        overfit_df = overfit_df.drop(not_needed_column_names, axis=1)
+        overfit_df.columns = [name_to_label[column_name]  for column_name in overfit_df.columns]
+        overfit_df = overfit_df.reset_index()
+        # overfit_df = overfit_df[overfit_df['task_id'] != 168910]
+        # overfit_df['Dataset'] = list(map(replace_name, overfit_df['task_id']))
+        # overfit_df = overfit_df.drop(['task_id'], axis=1)
+    else:
+        combined_results = {}
+        for dataset in ['train', 'test']:
+            combined_results[dataset] = pd.read_csv(os.path.join(out_dir, f'combined_results_mean_{dataset}.csv'))
+        overfit_df = (combined_results['test'] - combined_results['train'])
+        overfit_df['task_id'] = combined_results['train']['task_id']
+        not_needed_column_names = [column_name for column_name in overfit_df.columns if column_name.replace('_mean', '') not in strategies and column_name != 'task_id' and column_name in overfit_df.columns]
+            # not_needed_column_names.pop('task_id')
+            
+        print(strategies, "\n", not_needed_column_names)
+        overfit_df = overfit_df.drop(not_needed_column_names, axis=1)
+        overfit_df.columns = [name_to_label[column_name.replace('_mean', '')] if column_name != 'task_id' else column_name for column_name in overfit_df.columns]
+        overfit_df = overfit_df[overfit_df['task_id'] != 168910]
+        overfit_df['Dataset'] = list(map(replace_name, overfit_df['task_id']))
+        overfit_df = overfit_df.drop(['task_id'], axis=1)
+
+    figsize=(21, 16)
+    markersize = 300
+    ax = overfit_df.plot.scatter(
+            x=name_to_label[strategies[0]],
+            y='Dataset',
+            label=name_to_label[strategies[0]],
+            yticks=(overfit_df['Dataset']),
+            marker='*',
+            figsize=figsize,
+            c=color_marker[strategies[0]],
+            s=markersize)
+
+    for i, strategy in enumerate(strategies):
+        if i==0:
+            continue
+        ax = overfit_df.plot.scatter(
+                            x=name_to_label[strategy],
+                            y='Dataset',
+                            label=name_to_label[strategy],
+                            yticks=(overfit_df['Dataset']),
+                            marker='*',
+                            figsize=figsize,
+                            c=color_marker[strategy],
+                            ax=ax,
+                            s=markersize
+                        )
+    ax.axvline(x=0, color='black', alpha=0.5, linestyle='--')
+    ax.set_xlabel('Best ever test score - test score [%]')
+    ax.set_ylabel('Dataset')
+    minmax_df = overfit_df.drop(['Dataset'], axis=1).to_numpy()
+    print(overfit_df.head())
+    print(minmax_df.min(), minmax_df.max()) # np.arange(minmax_df.min(), minmax_df.max(), 2))
+    ax.set_xticks(np.arange(np.floor(minmax_df.min()), np.ceil(minmax_df.max()), 0.5), minor=True)
+    ax.grid(which='major', alpha=0.7)
+    ax.grid(which='minor', alpha=0.4)
+    fig = ax.get_figure()
+    fig.savefig(os.path.join(out_dir, f'combined_results_overfit.png'))
+    plt.close(fig)
+    overfit_df.to_csv(os.path.join(out_dir, f'combined_results_overfit.csv'))
+
+
+from dataset_collection import medium_task_ids, small_task_ids
+
+IGNORE_TASKS = [146606, 168868]
+SIZE_11_IGNORE_TASKS = [168909, 146825]
+
+def test_method(df_method:  pd.Series, values):
+    bool_mask = []
+    values = values.copy()
+    for method in df_method.items():
+        this_mask = []
+        for val in values:
+            this_mask.append(val == method[1])
+        bool_mask.append(this_mask)
+    return bool_mask
+
+def task_bool_mask(df_task:  pd.Series, benchmark=None, size=5):
+    ignore_task_ids = []
+    if benchmark is not None:
+        if benchmark == 'small':
+            ignore_task_ids = medium_task_ids
+        elif benchmark == 'medium':
+            ignore_task_ids = small_task_ids
+    ignore_task_ids.extend(IGNORE_TASKS)
+    if size == 11:
+        ignore_task_ids.extend(SIZE_11_IGNORE_TASKS)
+
+    print(f"Ignored task ids: {ignore_task_ids}")
+    bool_mask = []
+    for task in df_task.items():
+        bool_mask.append(all(val != task[1] for val in ignore_task_ids))
+    return bool_mask
 
 
 

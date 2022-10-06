@@ -380,7 +380,7 @@ def wilcoxon_holm(out_dir, setname, alpha=0.05, df_perf=None):
     better_classifiers.sort(key=operator.itemgetter('p_value'))
     better_classifiers = pd.DataFrame(better_classifiers)
     better_classifiers.to_csv(f"{out_dir}/cd_comparison_pairwise_{setname}.csv")
-    get_according_to_thesis(better_classifiers).to_csv(f"{out_dir}/cd_comparison_pairwise_{setname}_display.csv")
+    get_according_to_thesis(better_classifiers).T.to_csv(f"{out_dir}/cd_comparison_pairwise_{setname}_display.csv")
     # loop through the hypothesis
     for i in range(k):
         # correct alpha with holm

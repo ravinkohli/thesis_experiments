@@ -39,7 +39,7 @@ def make_incumbent_plot(
         dataset_name = dataset_info[dataset_info['OpenML Task Id'] == task]['Dataset Name'].item()
         fig, axs = plt.subplots(
             1,
-            figsize=(7, 4),
+            figsize=(10, 4),
 
         )
         for strategy in strategies:
@@ -52,12 +52,19 @@ def make_incumbent_plot(
             losses = []
             times = []
             for seed in SEEDS:
-                if task in results[strategy] and seed in results[strategy][task]:
-                    losses.append(np.array(list(results[strategy][task][seed]['ensemble_history'][f'{dataset}_balanced_accuracy'].values())))
+                if task in results[strategy] and seed in results[strategy][task] and 'ensemble_history' in results[strategy][task][seed]:
+                    
+                    raw_loss = np.array(list(results[strategy][task][seed]['ensemble_history'][f'{dataset}_balanced_accuracy'].values()))
+                    failed_losses = [i for i in range(len(raw_loss)) if raw_loss[i] is None]
+
                     time = np.array(list(results[strategy][task][seed]['ensemble_history']['Timestamp'].values()))/1000
                     duration = durations[strategy][task][seed]['duration']
                     initial_time = time[-1] - duration
                     time = time - initial_time
+
+                    raw_loss = np.delete(raw_loss, failed_losses)
+                    losses.append(np.maximum.accumulate(raw_loss))
+                    time = np.delete(time, failed_losses)
                     times.append(time)
 
 
@@ -68,30 +75,34 @@ def make_incumbent_plot(
                     name_to_label=name_to_label,
                     color_marker=color_marker,
                     title=dataset_name,
-                    xlabel=X_LABEL if task_index == 0 else None,
-                    ylabel=f"{dataset[0].replace('t', 'T')}{dataset[1:]} {Y_LABEL}" if task_index == 0 else None,
+                    xlabel=X_LABEL,
+                    ylabel=f"{dataset[0].replace('t', 'T')}{dataset[1:]} {Y_LABEL}",
                     strategy=strategy,
                     log=True,
                 )
+
+        
             # axs.set_xticks(X_MAP)
             # axs.set_xlim(min(X_MAP), max(X_MAP))
             # axs[task_index].set_ylim(
             #     min(Y_MAP[dataset][experiment]),
             #     max(Y_MAP[dataset][experiment])
             # )
+        
         sns.despine(fig)
 
-        _legend_flag = len(strategies) % 2 != 0
-        handles, labels = axs.get_legend_handles_labels()
-        fig.legend(
-            handles,
-            labels,
-            loc="lower center",
-            bbox_to_anchor=(0.5, -0.15) if _legend_flag else (0.5, -0.25),
-            ncol=len(strategies) if _legend_flag else 2,
-            frameon=False
-        )
-        fig.tight_layout(pad=0, h_pad=.5)
+        fig.legend(prop={'size':13}, bbox_to_anchor=(1,0), loc="lower right",  bbox_transform=fig.transFigure)
+        # _legend_flag = len(strategies) % 2 != 0
+        # handles, labels = axs.get_legend_handles_labels()
+        # fig.legend(
+        #     handles,
+        #     labels,
+        #     loc="lower center",
+        #     bbox_to_anchor=(0.5, -0.15) if _legend_flag else (0.5, -0.25),
+        #     ncol=len(strategies) if _legend_flag else 2,
+        #     frameon=False
+        # )
+        # fig.tight_layout(pad=0, h_pad=.5)
 
         save_fig(
             fig,

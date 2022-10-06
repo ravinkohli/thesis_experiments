@@ -36,34 +36,39 @@ for folder in folders:
                 experiment_name = ''.join([k[0] for k in experiment_name.split('_')])
                 for option in ['posthoc_ensemble_fit', 'enable_traditional_pipeline', 'use_ensemble_opt_loss', 'warmstart']:
                     experiment_name +=  f"_{''.join([k[0] for k in option.split('_')])}_{str(content[option])[0]}"
-                try:
-                    
-                    if os.path.exists(estimator_file) and 'ensemble_iterative_hpo' in experiment_name:
-                        directory = root.split('/')[-1]
-                        # plot_directory = f'./incumbent_plots/{directory}'
-                        # os.makedirs(plot_directory, exist_ok=True)
+                if 'eih' in experiment_name:
+                    try:
                         
-                        with open(estimator_file, 'rb') as f:
-                            estimator = pickle.load(f)
-                        # metric_name = 'balanced_accuracy'
+                        if os.path.exists(estimator_file):
+                            print(f"path found: {estimator_file}")
+                            directory = root.split('/')[-1]
+                            # plot_directory = f'./incumbent_plots/{directory}'
+                            # os.makedirs(plot_directory, exist_ok=True)
+                            
+                            with open(estimator_file, 'rb') as f:
+                                estimator = pickle.load(f)
+                            # metric_name = 'balanced_accuracy'
 
-                        # metric_results = MetricResults(
-                        #     metric=getattr(metrics, metric_name),
-                        #     run_history=estimator.run_history,
-                        #     ensemble_performance_history=estimator.ensemble_performance_history,
-                        # )
-                        if experiment_name not in task_id_to_performance:
-                            task_id_to_performance[experiment_name] = {}
-                        if task_id not in task_id_to_performance[experiment_name]:
-                            task_id_to_performance[experiment_name][task_id] = {}
-                        if seed not in task_id_to_performance[experiment_name][task_id]:
-                            task_id_to_performance[experiment_name][task_id][seed] = {}
-                        incumbent_run_history = estimator.run_history
-                        task_id_to_performance[experiment_name][task_id][seed]['incumbent_run_history'] = incumbent_run_history
-                        with open('./task_id_to_performance_eih.pkl', 'wb') as fp:
-                            pickle.dump(task_id_to_performance, fp)
-                except:
-                    continue
+                            # metric_results = MetricResults(
+                            #     metric=getattr(metrics, metric_name),
+                            #     run_history=estimator.run_history,
+                            #     ensemble_performance_history=estimator.ensemble_performance_history,
+                            # )
+                            if experiment_name not in task_id_to_performance:
+                                task_id_to_performance[experiment_name] = {}
+                            if task_id not in task_id_to_performance[experiment_name]:
+                                task_id_to_performance[experiment_name][task_id] = {}
+                            if seed not in task_id_to_performance[experiment_name][task_id]:
+                                task_id_to_performance[experiment_name][task_id][seed] = {}
+                            incumbent_run_history = estimator.run_history
+                            task_id_to_performance[experiment_name][task_id][seed]['incumbent_run_history'] = incumbent_run_history
+                            with open('./task_id_to_performance_eih.pkl', 'wb') as fp:
+                                pickle.dump(task_id_to_performance, fp)
+                        else:
+                            print(f"path not found: {estimator_file}")  
+                    except:
+                        continue
+                    
 
 with open('./task_id_to_performance_eih.pkl', 'wb') as fp:
     pickle.dump(task_id_to_performance, fp)
