@@ -15,9 +15,9 @@ iEBOR > ESS > EBO
 import os
 import matplotlib.pyplot as plt
 import numpy as np
-from plot_utilities import incumbent_plot, save_fig, set_general_plot_style
+from plot_utilities import incumbent_plot, incumbent_plot_with_lists, save_fig, set_general_plot_style
 import seaborn as sns
-from experiment_utils import SEEDS, TASKS, X_LABEL, Y_LABEL
+from experiment_utils import SEEDS, TASKS, X_LABEL, X_MAP, Y_LABEL
 
 
 def make_incumbent_plot(
@@ -33,8 +33,6 @@ def make_incumbent_plot(
 ):
 
     for task_index, task in enumerate(TASKS):
-        strategies_dict = {}
-        strategy_names = []
         set_general_plot_style()
 
         dataset_name = dataset_info[dataset_info['OpenML Task Id'] == task]['Dataset Name'].item()
@@ -43,19 +41,21 @@ def make_incumbent_plot(
             figsize=(10, 4),
 
         )
+        losses = {}
+        times = {}
+        min_y = np.inf
+        min_x = np.inf
+        max_x = -np.inf
         for strategy in strategies:
             if strategy not in results:
                 print(f"{strategy} not found")
                 continue
-            strategy_name = name_to_label[strategy]
-            strategies_dict[strategy_name] = {}
-            strategy_names.append(strategy_name)
-            losses = []
-            times = []
+            losses[strategy] = []
+            times[strategy] = []
             for seed in SEEDS:
                 if task in results[strategy] and seed in results[strategy][task] and 'ensemble_history' in results[strategy][task][seed]:
                     
-                    useful_results = results if 'eih' not in strategy else eih_results
+                    useful_results = results if 'eih' not in strategy or 'nsl_1' in strategy else eih_results
                     raw_loss = np.array(list(useful_results[strategy][task][seed]['ensemble_history'][f'{dataset}_balanced_accuracy'].values()))
                     failed_losses = [i for i in range(len(raw_loss)) if raw_loss[i] is None]
 
@@ -65,40 +65,60 @@ def make_incumbent_plot(
                     time = time - initial_time
 
                     raw_loss = np.delete(raw_loss, failed_losses)
+                    min_raw_loss = min(raw_loss)
+                    if min_raw_loss < min_y:
+                        min_y = min_raw_loss
                     raw_loss = np.append([0], raw_loss)
                     incumbent_loss = np.maximum.accumulate(raw_loss)
                     incumbent_time = np.delete(time, failed_losses)
-
+                    min_incumbent_time = min(incumbent_time)
+                    if min_incumbent_time < min_x:
+                        min_x = min_incumbent_time
+                    max_incumbent_time = max(incumbent_time)
+                    if max_incumbent_time > max_x:
+                        max_x = max_incumbent_time
                     incumbent_time = np.append([0], incumbent_time)
-                    losses.append(incumbent_loss)
-                    times.append(incumbent_time)
-                    
+                    losses[strategy].append(incumbent_loss)
+                    times[strategy].append(incumbent_time)
 
+        incumbent_plot_with_lists(
+                ax=axs,
+                times=times,
+                losses=losses,
+                name_to_label=name_to_label,
+                color_marker=color_marker,
+            )
 
-            incumbent_plot(
-                    ax=axs,
-                    x=times,
-                    y=losses,
-                    name_to_label=name_to_label,
-                    color_marker=color_marker,
-                    title=dataset_name,
-                    xlabel=X_LABEL,
-                    ylabel=f"{dataset[0].replace('t', 'T')}{dataset[1:]} {Y_LABEL}",
-                    strategy=strategy,
-                    log=True,
-                )
+        title=dataset_name
+        xlabel=X_LABEL
+        ylabel=f"{dataset[0].replace('t', 'T')}{dataset[1:]} {Y_LABEL}"
+        log=True
+        if title is not None:
+            axs.set_title(title, fontsize=18) # [title])
+        if xlabel is not None:
+            axs.set_xlabel(xlabel, fontsize=18)
+        if ylabel is not None:
+            axs.set_ylabel(ylabel, fontsize=18)
+        axs.grid(True, which="both", ls="-", alpha=0.8)
 
+        axs.tick_params(axis='both', which='major', labelsize=18)
+
+        if log:
+            axs.set_xscale("log")
         
-            # axs.set_xticks(X_MAP)
-            # axs.set_xlim(min(X_MAP), max(X_MAP))
+        # axs.set_xticks(X_MAP[task])
+        axs.set_xlim(min_x, max_x)
+            
+            # min(X_MAP[task]), max(X_MAP[task]))
             # axs[task_index].set_ylim(
             #     min(Y_MAP[dataset][experiment]),
             #     max(Y_MAP[dataset][experiment])
             # )
-        
+        axs.set_ylim(ymin=min_y) # -0.1)
+
         sns.despine(fig)
 
-        fig.legend(prop={'size':13}, bbox_to_anchor=(1,0), loc="lower right",  bbox_transform=fig.transFigure)
+        fig.legend(prop={'size':13}, bbox_to_anchor=(1,0), loc="center right",  bbox_transform=fig.transFigure)
         # _legend_flag = len(strategies) % 2 != 0
         # handles, labels = axs.get_legend_handles_labels()
         # fig.legend(
@@ -109,7 +129,7 @@ def make_incumbent_plot(
         #     ncol=len(strategies) if _legend_flag else 2,
         #     frameon=False
         # )
-        # fig.tight_layout(pad=0, h_pad=.5)
+        fig.tight_layout(pad=0, h_pad=.5)
 
         save_fig(
             fig,
@@ -119,42 +139,42 @@ def make_incumbent_plot(
 
 
 
-['ebo_etp_F_w_F_pef_T_ueol_F',
-'ebo_etp_T_w_F_pef_T_ueol_F',
-'ebo_etp_F_w_F_pef_F_ueol_F',
-'ebor_etp_T_w_F_pef_T_ueol_F',
-'ebos_etp_T_w_F_pef_T_ueol_F',
-'es_etp_F_w_F_pef_F_ueol_F',
-'es_etp_T_w_F_pef_F_ueol_F',
-'eih_etp_F_w_F_pef_T_ueol_F',
-'eih_etp_T_w_F_pef_T_ueol_F',
-'eih_etp_F_w_T_pef_T_ueol_F',
-'eih_etp_T_w_T_pef_T_ueol_F',
-'eih_etp_F_w_T_pef_F_ueol_F',
-'eih_etp_T_w_T_pef_F_ueol_F',
-'eih_etp_F_w_F_pef_F_ueol_F',
-'ebo_etp_F_w_F_pef_F_ueol_T',
-'ebo_etp_F_w_F_pef_T_ueol_T',
-'ebo_etp_T_w_F_pef_T_ueol_T',
-'ebor_etp_F_w_F_pef_T_ueol_T',
-'ebos_etp_F_w_F_pef_T_ueol_T',
-'ebor_etp_T_w_F_pef_T_ueol_T',
-'ebos_etp_T_w_F_pef_T_ueol_T',
-'sespl_etp_F_w_F_pef_F_ueol_F',
-'esr_etp_F_w_F_pef_F_ueol_F',
-'sespl_etp_T_w_F_pef_F_ueol_F',
-'esr_etp_T_w_F_pef_F_ueol_F',
-'eihr_etp_F_w_T_pef_T_ueol_F',
-'eihs_etp_F_w_T_pef_T_ueol_F',
-'eihs_etp_T_w_T_pef_T_ueol_F',
-'eihr_etp_T_w_T_pef_T_ueol_F',
-'eihr_etp_F_w_F_pef_T_ueol_F',
-'eihs_etp_F_w_F_pef_T_ueol_F',
-'sft_etp_F_w_F_pef_T_ueol_F',
-'eihr_etp_T_w_F_pef_T_ueol_F',
-'sft_etp_T_w_F_pef_T_ueol_F',
-'eihs_etp_T_w_F_pef_T_ueol_F',
-'sft_etp_F_w_F_pef_F_ueol_F',
-'eihr_etp_F_w_T_pef_F_ueol_F',
-'eihs_etp_F_w_T_pef_F_ueol_F',
-'sa_etp_F_w_F_pef_F_ueol_F']
+# ['ebo_etp_F_w_F_pef_T_ueol_F',
+# 'ebo_etp_T_w_F_pef_T_ueol_F',
+# 'ebo_etp_F_w_F_pef_F_ueol_F',
+# 'ebor_etp_T_w_F_pef_T_ueol_F',
+# 'ebos_etp_T_w_F_pef_T_ueol_F',
+# 'es_etp_F_w_F_pef_F_ueol_F',
+# 'es_etp_T_w_F_pef_F_ueol_F',
+# 'eih_etp_F_w_F_pef_T_ueol_F',
+# 'eih_etp_T_w_F_pef_T_ueol_F',
+# 'eih_etp_F_w_T_pef_T_ueol_F',
+# 'eih_etp_T_w_T_pef_T_ueol_F',
+# 'eih_etp_F_w_T_pef_F_ueol_F',
+# 'eih_etp_T_w_T_pef_F_ueol_F',
+# 'eih_etp_F_w_F_pef_F_ueol_F',
+# 'ebo_etp_F_w_F_pef_F_ueol_T',
+# 'ebo_etp_F_w_F_pef_T_ueol_T',
+# 'ebo_etp_T_w_F_pef_T_ueol_T',
+# 'ebor_etp_F_w_F_pef_T_ueol_T',
+# 'ebos_etp_F_w_F_pef_T_ueol_T',
+# 'ebor_etp_T_w_F_pef_T_ueol_T',
+# 'ebos_etp_T_w_F_pef_T_ueol_T',
+# 'sespl_etp_F_w_F_pef_F_ueol_F',
+# 'esr_etp_F_w_F_pef_F_ueol_F',
+# 'sespl_etp_T_w_F_pef_F_ueol_F',
+# 'esr_etp_T_w_F_pef_F_ueol_F',
+# 'eihr_etp_F_w_T_pef_T_ueol_F',
+# 'eihs_etp_F_w_T_pef_T_ueol_F',
+# 'eihs_etp_T_w_T_pef_T_ueol_F',
+# 'eihr_etp_T_w_T_pef_T_ueol_F',
+# 'eihr_etp_F_w_F_pef_T_ueol_F',
+# 'eihs_etp_F_w_F_pef_T_ueol_F',
+# 'sft_etp_F_w_F_pef_T_ueol_F',
+# 'eihr_etp_T_w_F_pef_T_ueol_F',
+# 'sft_etp_T_w_F_pef_T_ueol_F',
+# 'eihs_etp_T_w_F_pef_T_ueol_F',
+# 'sft_etp_F_w_F_pef_F_ueol_F',
+# 'eihr_etp_F_w_T_pef_F_ueol_F',
+# 'eihs_etp_F_w_T_pef_F_ueol_F',
+# 'sa_etp_F_w_F_pef_F_ueol_F']

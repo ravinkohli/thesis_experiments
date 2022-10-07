@@ -3,7 +3,7 @@ from datetime import datetime
 import os
 import seaborn as sns
 from tkinter.tix import Tree
-from typing import Dict, NamedTuple
+from typing import Dict, List, NamedTuple
 from autoPyTorch.utils.results_visualizer import PlotSettingParams
 from autoPyTorch.utils.results_visualizer import ResultsVisualizer, _get_perf_and_time
 from autoPyTorch import metrics
@@ -14,6 +14,8 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 # from path import Path
+
+
 
 
 class StoreResults(NamedTuple):
@@ -84,11 +86,69 @@ def incumbent_plot(
 
     ax.tick_params(axis='both', which='major', labelsize=18)
 
-    ax.set_ylim(ymin=min(y_mean))
+    # ax.set_ylim(ymin=min(y_mean))
     # ax.set_xlim(xmin=0)
     if log:
         ax.set_xscale("log")
         # ax.set_yscale("log")
+
+def interpolate_time_with_lists(incumbents, costs):
+    df_dict = {}
+
+    for strategy in incumbents:
+        for i, _ in enumerate(incumbents[strategy]):
+            _seed_info = pd.Series(incumbents[strategy][i], index=costs[strategy][i])
+            df_dict[f"{strategy}_{i}"] = _seed_info
+    df = pd.DataFrame.from_dict(df_dict)
+
+    # min_y = df.min()
+    df = df.fillna(method="backfill", axis=0).fillna(method="ffill", axis=0)
+    return df
+
+def get_incumbent_with_mean(strategies: List[str], df: pd.DataFrame):
+
+    y_dict = {}
+    std_error_dict = {}
+    for strategy in strategies:
+        strategy_df = df[[column for column in df.columns if strategy in column]]
+        y_dict[strategy] = strategy_df.mean(axis=1)
+        std_error_dict[strategy] = stats.sem(strategy_df.values, axis=1)
+    
+    return y_dict, std_error_dict
+
+def incumbent_plot_with_lists(
+    ax,
+    losses,
+    times,
+    name_to_label,
+    color_marker,
+    **plot_kwargs,
+):
+
+    df = interpolate_time_with_lists(incumbents=losses, costs=times)
+    df = df.iloc[np.linspace(0, len(df) - 1, 1001)]
+    x = df.index
+
+    y_dict, std_error_dict = get_incumbent_with_mean(losses.keys(), df)
+
+    for strategy in losses:
+        ax.plot(
+            x,
+            y_dict[strategy],
+            label=name_to_label[strategy],
+            **plot_kwargs,
+            color=color_marker[strategy],
+            linewidth=1
+        )
+
+        ax.fill_between(
+            x,
+            y_dict[strategy] - std_error_dict[strategy],
+            y_dict[strategy] + std_error_dict[strategy],
+            color=color_marker[strategy],
+            alpha=0.1,
+        )
+
 
 
 def save_fig(fig, filename, output_dir, dpi: int = 100):
