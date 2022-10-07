@@ -22,12 +22,12 @@ class StoreResults(NamedTuple):
     labels: Dict
     plot_setting_params: PlotSettingParams
 
-def interpolate_time(incumbents, costs):
+def interpolate_time(incumbents, costs, strategy):
     df_dict = {}
 
     for i, _ in enumerate(incumbents):
         _seed_info = pd.Series(incumbents[i], index=costs[i])
-        df_dict[f"seed{i}"] = _seed_info
+        df_dict[f"{strategy}_{i}"] = _seed_info
     df = pd.DataFrame.from_dict(df_dict)
 
     df = df.fillna(method="backfill", axis=0).fillna(method="ffill", axis=0)
@@ -51,7 +51,7 @@ def incumbent_plot(
     if isinstance(y, list):
         y = np.array(y)
 
-    df = interpolate_time(incumbents=y, costs=x)
+    df = interpolate_time(incumbents=y, costs=x, strategy=strategy)
     df = df.iloc[np.linspace(0, len(df) - 1, 1001)]
     x = df.index
     y_mean = df.mean(axis=1)
@@ -84,6 +84,8 @@ def incumbent_plot(
 
     ax.tick_params(axis='both', which='major', labelsize=18)
 
+    ax.set_ylim(ymin=min(y_mean))
+    # ax.set_xlim(xmin=0)
     if log:
         ax.set_xscale("log")
         # ax.set_yscale("log")

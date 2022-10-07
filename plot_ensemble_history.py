@@ -28,7 +28,8 @@ def make_incumbent_plot(
     name_to_label,
     dataset,
     color_marker,
-    durations
+    durations,
+    eih_results
 ):
 
     for task_index, task in enumerate(TASKS):
@@ -54,18 +55,24 @@ def make_incumbent_plot(
             for seed in SEEDS:
                 if task in results[strategy] and seed in results[strategy][task] and 'ensemble_history' in results[strategy][task][seed]:
                     
-                    raw_loss = np.array(list(results[strategy][task][seed]['ensemble_history'][f'{dataset}_balanced_accuracy'].values()))
+                    useful_results = results if 'eih' not in strategy else eih_results
+                    raw_loss = np.array(list(useful_results[strategy][task][seed]['ensemble_history'][f'{dataset}_balanced_accuracy'].values()))
                     failed_losses = [i for i in range(len(raw_loss)) if raw_loss[i] is None]
 
-                    time = np.array(list(results[strategy][task][seed]['ensemble_history']['Timestamp'].values()))/1000
+                    time = np.array(list(useful_results[strategy][task][seed]['ensemble_history']['Timestamp'].values()))/1000
                     duration = durations[strategy][task][seed]['duration']
                     initial_time = time[-1] - duration
                     time = time - initial_time
 
                     raw_loss = np.delete(raw_loss, failed_losses)
-                    losses.append(np.maximum.accumulate(raw_loss))
-                    time = np.delete(time, failed_losses)
-                    times.append(time)
+                    raw_loss = np.append([0], raw_loss)
+                    incumbent_loss = np.maximum.accumulate(raw_loss)
+                    incumbent_time = np.delete(time, failed_losses)
+
+                    incumbent_time = np.append([0], incumbent_time)
+                    losses.append(incumbent_loss)
+                    times.append(incumbent_time)
+                    
 
 
             incumbent_plot(

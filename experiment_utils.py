@@ -389,7 +389,7 @@ SETS = {
 # },
     'eih_all':{
         "strategies": [
-            'eih_pef_T_etp_T_ueol_F_w_T_nsl_1',
+            # 'eih_pef_T_etp_T_ueol_F_w_T_nsl_1',
             'eihr_pef_T_etp_T_ueol_F_w_T_nsl_2',
             'eihs_pef_T_etp_T_ueol_F_w_T_nsl_2',
         ],
