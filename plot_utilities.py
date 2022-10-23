@@ -146,10 +146,9 @@ def incumbent_plot_with_lists(
             y_dict[strategy] - std_error_dict[strategy],
             y_dict[strategy] + std_error_dict[strategy],
             color=color_marker[strategy],
-            alpha=0.1,
+            alpha=0.2,
         )
-
-
+    return df
 
 def save_fig(fig, filename, output_dir, dpi: int = 100):
     if not os.path.exists(output_dir):
@@ -203,12 +202,11 @@ def make_overfit_plot(out_dir, strategies, name_to_label, color_marker, best_tes
         overfit_df = pd.read_csv('final_thesis_results/ensemble_size_5/all/combined_results_mean_test_all_overfit.csv').set_index('Dataset')
         not_needed_column_names = [column_name for column_name in overfit_df.columns if column_name not in strategies]
             # not_needed_column_names.pop('task_id')
-            
+        # overfit_df = overfit_df[overfit_df['task_id'] != 168910 or overfit_df['task_id'] != 146825]
         # print(strategies, "\n", not_needed_column_names)
         overfit_df = overfit_df.drop(not_needed_column_names, axis=1)
         overfit_df.columns = [name_to_label[column_name]  for column_name in overfit_df.columns]
         overfit_df = overfit_df.reset_index()
-        # overfit_df = overfit_df[overfit_df['task_id'] != 168910]
         # overfit_df['Dataset'] = list(map(replace_name, overfit_df['task_id']))
         # overfit_df = overfit_df.drop(['task_id'], axis=1)
     else:
@@ -223,12 +221,12 @@ def make_overfit_plot(out_dir, strategies, name_to_label, color_marker, best_tes
         print(strategies, "\n", not_needed_column_names)
         overfit_df = overfit_df.drop(not_needed_column_names, axis=1)
         overfit_df.columns = [name_to_label[column_name.replace('_mean', '')] if column_name != 'task_id' else column_name for column_name in overfit_df.columns]
-        overfit_df = overfit_df[overfit_df['task_id'] != 168910]
+        overfit_df = overfit_df[overfit_df['task_id'] != 168910 or overfit_df['task_id'] != 146825]
         overfit_df['Dataset'] = list(map(replace_name, overfit_df['task_id']))
         overfit_df = overfit_df.drop(['task_id'], axis=1)
 
-    figsize=(21, 16)
-    markersize = 300
+    figsize=(12, 10)
+    markersize = 200
     ax = overfit_df.plot.scatter(
             x=name_to_label[strategies[0]],
             y='Dataset',
@@ -259,7 +257,7 @@ def make_overfit_plot(out_dir, strategies, name_to_label, color_marker, best_tes
     minmax_df = overfit_df.drop(['Dataset'], axis=1).to_numpy()
     print(overfit_df.head())
     print(minmax_df.min(), minmax_df.max()) # np.arange(minmax_df.min(), minmax_df.max(), 2))
-    ax.set_xticks(np.arange(np.floor(minmax_df.min()), np.ceil(minmax_df.max()), 0.5), minor=True)
+    ax.set_xticks(np.arange(np.floor(minmax_df.min()), np.ceil(minmax_df.max()), 1), minor=True)
     ax.grid(which='major', alpha=0.7)
     ax.grid(which='minor', alpha=0.4)
     fig = ax.get_figure()

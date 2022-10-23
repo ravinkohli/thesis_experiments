@@ -167,7 +167,7 @@ print(options)
 if __name__ == '__main__':
     from itertools import product
     dataset_info = pd.read_csv(f'./{args.task_ids_file}.csv')
-    save_folder = f"ensemble_size_11_jobs/NEMO_thesis_{args.experiment_name}_{args.task_ids_file.split('_')[0]}"
+    save_folder = f"ensemble_size_5_jobs/NEMO_thesis_{args.experiment_name}_{args.task_ids_file.split('_')[0]}_2"
     seeds = [106, 355, 839] # random.sample(range(1000), 4)
     for seed in seeds:
         params = parameters[args.experiment_name]
@@ -183,19 +183,20 @@ if __name__ == '__main__':
             experiment_details = {**experiment_details, **options}
             experiment_details['seed'] = seed
             for task_id in dataset_info['Task_id']:
-                seconds_in_day = 60 * 60 * 24
-                seconds_in_hour = 60 * 60
-                seconds_in_minute = 60
-                seconds = min(args.wall_time + 12 * seconds_in_hour, 345600)
-                days = seconds // seconds_in_day
-                hours = (seconds - (days * seconds_in_day)) // seconds_in_hour
-                minutes = (seconds - (days * seconds_in_day) - (hours * seconds_in_hour)) // seconds_in_minute
+                if task_id in [10101, 3, 168335, 14965, 146195, 31, 9981, 7592]:
+                    seconds_in_day = 60 * 60 * 24
+                    seconds_in_hour = 60 * 60
+                    seconds_in_minute = 60
+                    seconds = min(args.wall_time + 12 * seconds_in_hour, 345600)
+                    days = seconds // seconds_in_day
+                    hours = (seconds - (days * seconds_in_day)) // seconds_in_hour
+                    minutes = (seconds - (days * seconds_in_day) - (hours * seconds_in_hour)) // seconds_in_minute
 
-                generate_job_file(task_id=int(task_id),
-                                    experiment_details=experiment_details,
-                                    memory=args.mem_limit,
-                                    file_to_run=args.file_to_run,
-                                    save_folder=experiment_save_folder,
-                                    time_limit=(days, hours, minutes),
-                                    cluster=args.cluster,
-                                    env_name=args.env_name)
+                    generate_job_file(task_id=int(task_id),
+                                        experiment_details=experiment_details,
+                                        memory=args.mem_limit,
+                                        file_to_run=args.file_to_run,
+                                        save_folder=experiment_save_folder,
+                                        time_limit=(days, hours, minutes),
+                                        cluster=args.cluster,
+                                        env_name=args.env_name)

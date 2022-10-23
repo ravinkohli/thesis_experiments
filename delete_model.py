@@ -15,12 +15,10 @@ for folder in folders:
                     model_file_path = None
                     for folder in os.listdir(runs_directory):
                         run_directory = os.path.join(runs_directory, folder)
+                        paths = []
                         for file in os.listdir(run_directory):
                             if '.model' in file:
                                 model_file_path = os.path.join(run_directory, file)
-                                break
-                    
-                    if model_file_path is not None and os.path.exists(model_file_path):
-                        print(model_file_path)
-                        # shutil.rmtree(model_file_path)
+                                print(model_file_path)
+                                os.remove(model_file_path)
                     

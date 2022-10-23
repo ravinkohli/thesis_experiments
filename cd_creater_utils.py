@@ -9,6 +9,7 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib
+import Orange
 
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
@@ -282,12 +283,12 @@ def form_cliques(p_values, nnames):
     return networkx.find_cliques(g)
 
 
-def draw_cd_diagram(setname, df_perf=None, alpha=0.05, title=None, labels=False, figname='cd-diagram', out_dir=''):
+def draw_cd_diagram(setname, df_perf=None, alpha=0.05, title=None, labels=False, figname='cd-diagram', graph_type="default", out_dir=''):
     """
     Draws the critical difference diagram given the list of pairwise classifiers that are
     significant or not
     """
-    p_values, average_ranks, _ = wilcoxon_holm(setname=setname, df_perf=df_perf, alpha=alpha, out_dir=out_dir)
+    p_values, average_ranks, num_datasets = wilcoxon_holm(setname=setname, df_perf=df_perf, alpha=alpha, out_dir=out_dir)
 
     print(average_ranks)
 
@@ -295,17 +296,23 @@ def draw_cd_diagram(setname, df_perf=None, alpha=0.05, title=None, labels=False,
         print(p)
 
 
-    graph_ranks(average_ranks.values, average_ranks.keys(), p_values,
-                cd=None, reverse=True, width=9, textspace=1.5, labels=labels)
-
-    font = {'family': 'sans-serif',
+    if graph_type == "default":
+        graph_ranks(average_ranks.values, average_ranks.keys(), p_values,
+                    cd=None, reverse=True, width=9, textspace=1.5, labels=labels)
+    else:
+        cd = Orange.evaluation.compute_CD(average_ranks.values, num_datasets, alpha="0.1", test="nemenyi") 
+        #tested on 14 datasets
+        print("cd=",cd)
+        Orange.evaluation.graph_ranks(average_ranks.values, average_ranks.keys(), cd=cd, width=5, textspace=1.5, cdmethod=0)
+    font = {
+        'family': 'sans-serif',
         'color':  'black',
         'weight': 'normal',
         'size': 22,
         }
     if title:
         plt.title(title,fontdict=font, y=0.9, x=0.5)
-    plt.savefig(f'{figname}.png',bbox_inches='tight')
+    plt.savefig(f'{figname}_{graph_type}.png',bbox_inches='tight')
 
 def wilcoxon_holm(out_dir, setname, alpha=0.05, df_perf=None):
     """
@@ -380,7 +387,7 @@ def wilcoxon_holm(out_dir, setname, alpha=0.05, df_perf=None):
     better_classifiers.sort(key=operator.itemgetter('p_value'))
     better_classifiers = pd.DataFrame(better_classifiers)
     better_classifiers.to_csv(f"{out_dir}/cd_comparison_pairwise_{setname}.csv")
-    get_according_to_thesis(better_classifiers).T.to_csv(f"{out_dir}/cd_comparison_pairwise_{setname}_display.csv")
+    # get_according_to_thesis(better_classifiers).T.to_csv(f"{out_dir}/cd_comparison_pairwise_{setname}_display.csv")
     # loop through the hypothesis
     for i in range(k):
         # correct alpha with holm
@@ -408,7 +415,7 @@ def wilcoxon_holm(out_dir, setname, alpha=0.05, df_perf=None):
     dfff.T.to_csv(os.path.join(out_dir, "rank_per_task.csv"))
     # average the ranks
     average_ranks = df_ranks.rank(ascending=False).mean(axis=1).sort_values(ascending=False)
-    average_ranks.to_csv(os.path.join(out_dir, "average_ranks_per_task.csv"))
+    average_ranks.T.to_csv(os.path.join(out_dir, "average_ranks_per_task.csv"))
     # return the p-values and the average ranks
     return p_values, average_ranks, max_nb_datasets
 

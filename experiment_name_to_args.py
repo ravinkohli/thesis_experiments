@@ -19,11 +19,11 @@ parameters = {
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
-        'ensemble_size': [11],
+        'ensemble_size': [5],
         'num_stacking_layers': [1], #, 2], # , 3],
         'posthoc_ensemble_fit': [False], # , False],
-        'warmstart': [True],
-        'enable_traditional_pipeline': [True, False],
+        'warmstart': [False],
+        'enable_traditional_pipeline': [False],
     },
     'ensemble_selection':
     {

@@ -32,13 +32,14 @@ def make_incumbent_plot(
     eih_results
 ):
 
+    trajectories = []
     for task_index, task in enumerate(TASKS):
         set_general_plot_style()
 
         dataset_name = dataset_info[dataset_info['OpenML Task Id'] == task]['Dataset Name'].item()
         fig, axs = plt.subplots(
             1,
-            figsize=(10, 4),
+            figsize=(5, 3),
 
         )
         losses = {}
@@ -81,7 +82,7 @@ def make_incumbent_plot(
                     losses[strategy].append(incumbent_loss)
                     times[strategy].append(incumbent_time)
 
-        incumbent_plot_with_lists(
+        df = incumbent_plot_with_lists(
                 ax=axs,
                 times=times,
                 losses=losses,
@@ -118,17 +119,17 @@ def make_incumbent_plot(
 
         sns.despine(fig)
 
-        fig.legend(prop={'size':13}, bbox_to_anchor=(1,0), loc="center right",  bbox_transform=fig.transFigure)
-        # _legend_flag = len(strategies) % 2 != 0
-        # handles, labels = axs.get_legend_handles_labels()
-        # fig.legend(
-        #     handles,
-        #     labels,
-        #     loc="lower center",
-        #     bbox_to_anchor=(0.5, -0.15) if _legend_flag else (0.5, -0.25),
-        #     ncol=len(strategies) if _legend_flag else 2,
-        #     frameon=False
-        # )
+        # fig.legend(prop={'size':13}, bbox_to_anchor=(1,0), loc="center right",  bbox_transform=fig.transFigure)
+        _legend_flag = len(strategies) % 2 != 0
+        handles, labels = axs.get_legend_handles_labels()
+        fig.legend(
+            handles,
+            labels,
+            loc="lower center",
+            bbox_to_anchor=(0.5, -0.15) if _legend_flag else (0.5, -0.25),
+            ncol=len(strategies) if _legend_flag else 2,
+            frameon=False
+        )
         fig.tight_layout(pad=0, h_pad=.5)
 
         save_fig(
@@ -136,7 +137,52 @@ def make_incumbent_plot(
             filename= f"{task}",
             output_dir=figure_output_dir,
         )
+        trajectories.append(df)
+    return trajectories
+    
 
+# all_rankings = []
+# n_iter = 500  # number of bootstrap samples to use for estimating the ranks.
+# n_tasks = len(task_list)
+
+# for i in range(n_iter):
+#     pick = np.random.choice(all_trajectories[0][0].shape[1], size=(len(model_list)))
+
+#     for j in range(n_tasks):
+#         all_trajectories_tmp = pd.DataFrame(
+#             {
+#                 model_list[k]: at[j].iloc[:, pick[k]]
+#                 for k, at in enumerate(all_trajectories)
+#             }
+#         )
+#         all_trajectories_tmp = all_trajectories_tmp.fillna(method="ffill", axis=0)
+#         r_tmp = all_trajectories_tmp.rank(axis=1)
+#         all_rankings.append(r_tmp)
+
+# final_ranks = []
+# for i, model in enumerate(model_list):
+#     ranks_for_model = []
+#     for ranking in all_rankings:
+#         ranks_for_model.append(ranking.loc[:, model])
+#     ranks_for_model = pd.DataFrame(ranks_for_model)
+#     ranks_for_model = ranks_for_model.fillna(method="ffill", axis=1)
+#     final_ranks.append(ranks_for_model.mean(skipna=True))
+
+# # Step 3. Plot the average ranks over time.
+# #####################################################################################
+# for i, model in enumerate(model_list):
+#     X_data = []
+#     y_data = []
+#     for x, y in final_ranks[i].iteritems():
+#         X_data.append(x)
+#         y_data.append(y)
+#     X_data.append(max_runtime)
+#     y_data.append(y)
+#     plt.plot(X_data, y_data, label=model)
+#     plt.xlabel("time [sec]")
+#     plt.ylabel("average rank")
+#     plt.legend()
+# plt.savefig(saveto)
 
 
 # ['ebo_etp_F_w_F_pef_T_ueol_F',

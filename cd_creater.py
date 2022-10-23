@@ -43,4 +43,7 @@ def save_comparison(out_dir, csv_file, experiment_set, strategies, name_to_label
         df_perf=df_perf,
         title='Balanced Accuracy',
         labels=True, out_dir=out_dir,
+        alpha=0.1,
         figname=os.path.join(out_dir, f"{csv_file.split('/')[-1]}"))
+        # ,
+        # graph_type="nemeyi")

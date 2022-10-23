@@ -42,6 +42,10 @@ parser.add_argument(
     action='store_true'
 )
 parser.add_argument(
+    '--plot_ranks',
+    action='store_true'
+)
+parser.add_argument(
     '--perf_file',
     type=str,
     default='task_id_to_performance'
@@ -127,10 +131,12 @@ if __name__ == '__main__':
             
             if args.ensemble_plot and dataset == 'test':
                 try:
-                    make_incumbent_plot(figure_output_dir=os.path.join(out_dir, f"{dataset}_plots"), dataset_info=dataset_info, strategies=strategies, results=new_results, name_to_label=name_to_label, color_marker=color_marker, dataset=dataset, durations=new_durations, eih_results=eih_results)
+                    trajectories = make_incumbent_plot(figure_output_dir=os.path.join(out_dir, f"{dataset}_plots"), dataset_info=dataset_info, strategies=strategies, results=new_results, name_to_label=name_to_label, color_marker=color_marker, dataset=dataset, durations=new_durations, eih_results=eih_results)
                 except Exception as e:
-                    raise(e)
+                    # raise(e)
                     continue
+                if args.plot_ranks:
+                    print(trajectories)
 
         if args.overfit:
             make_overfit_plot(out_dir, strategies, name_to_label, color_marker)

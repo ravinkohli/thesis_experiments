@@ -13,7 +13,7 @@ def store_split_excel_file(out_dir, size, result_dir, dataset):
 
     with pd.ExcelWriter(os.path.join(out_dir, f'split_gathered_results_{dataset}.xlsx')) as w:
         for experiment_name in all_experiment_names:
-            result_df[result_df['experiment_name'] == experiment_name].to_excel(w, experiment_name)
+            result_df[result_df['experiment_name'] == experiment_name].to_excel(w, "".join([s[0] for s in experiment_name.split('_')]))
 
 def store_combined_results(out_dir, dataset):
     values = [[True, False]]*4

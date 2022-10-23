@@ -171,6 +171,7 @@ SETS = {
             'ebo_pef_T_etp_T_ueol_F_w_F_nsl_1': 'blue'
         }
     },
+    
     # 'ebo_all_stack': {
     #     "strategies": [
     #         'ebo_pef_F_etp_F_ueol_F_w_F_nsl_1',
@@ -341,6 +342,55 @@ SETS = {
             'ebo_pef_T_etp_T_ueol_F_w_F_nsl_1': 'blue'
         }
     },
+    'nsl_1_post': {
+        "strategies": [
+            'eih_pef_F_etp_F_ueol_F_w_T_nsl_1', 
+            'ebo_pef_F_etp_F_ueol_F_w_F_nsl_1',
+            'eih_pef_T_etp_F_ueol_F_w_T_nsl_1', 
+            'es_pef_F_etp_F_ueol_F_w_F_nsl_1',
+            'ebo_pef_T_etp_F_ueol_F_w_F_nsl_1'
+        ],
+        "NAME_TO_LABEL": {
+            'eih_pef_F_etp_F_ueol_F_w_T_nsl_1': "iEBO", 
+            'ebo_pef_F_etp_F_ueol_F_w_F_nsl_1': "EBO",
+            'eih_pef_T_etp_F_ueol_F_w_T_nsl_1': 'iEBO (Post)',
+            'es_pef_F_etp_F_ueol_F_w_F_nsl_1': 'BO (Post)',
+            'ebo_pef_T_etp_F_ueol_F_w_F_nsl_1': 'EBO (Post)'
+        },
+        "color_marker": {
+            'eih_pef_F_etp_F_ueol_F_w_T_nsl_1': "brown",
+            'ebo_pef_F_etp_F_ueol_F_w_F_nsl_1': "black",
+            'eih_pef_T_etp_F_ueol_F_w_T_nsl_1': 'red',
+            'es_pef_F_etp_F_ueol_F_w_F_nsl_1': 'green',
+            'ebo_pef_T_etp_F_ueol_F_w_F_nsl_1': 'blue'
+        }
+    },
+    'nsl_1_post+trad': {
+        "strategies": [
+            'eih_pef_F_etp_F_ueol_F_w_T_nsl_1', 
+            'es_pef_F_etp_F_ueol_F_w_F_nsl_1',
+            'ebo_pef_F_etp_F_ueol_F_w_F_nsl_1',
+            'eih_pef_T_etp_T_ueol_F_w_T_nsl_1', 
+            'es_pef_F_etp_T_ueol_F_w_F_nsl_1',
+            'ebo_pef_T_etp_T_ueol_F_w_F_nsl_1'
+        ],
+        "NAME_TO_LABEL": {
+            'eih_pef_F_etp_F_ueol_F_w_T_nsl_1': "iEBO (Post)", 
+            'es_pef_F_etp_F_ueol_F_w_F_nsl_1': "BO (Post)",
+            'ebo_pef_F_etp_F_ueol_F_w_F_nsl_1': "EBO (Post)",
+            'eih_pef_T_etp_T_ueol_F_w_T_nsl_1': 'iEBO (Post+Trad)',
+            'es_pef_F_etp_T_ueol_F_w_F_nsl_1': 'BO (Post+Trad)',
+            'ebo_pef_T_etp_T_ueol_F_w_F_nsl_1': 'EBO (Post+Trad)'
+        },
+        "color_marker": {
+            'eih_pef_F_etp_F_ueol_F_w_T_nsl_1': "brown",
+            'es_pef_F_etp_F_ueol_F_w_F_nsl_1': "violet",
+            'ebo_pef_F_etp_F_ueol_F_w_F_nsl_1': "black",
+            'eih_pef_T_etp_T_ueol_F_w_T_nsl_1': 'red',
+            'es_pef_F_etp_T_ueol_F_w_F_nsl_1': 'green',
+            'ebo_pef_T_etp_T_ueol_F_w_F_nsl_1': 'blue'
+        }
+    },
     'ebo_all': {
         "strategies": [
             'ebo_pef_T_etp_T_ueol_F_w_F_nsl_1',
@@ -440,6 +490,23 @@ SETS = {
     },
     "color_marker": {
             'ebo_pef_T_etp_T_ueol_F_w_F_nsl_1': 'red',
+            'eihr_pef_T_etp_T_ueol_F_w_T_nsl_2': 'green',
+            'sespl_pef_F_etp_T_ueol_F_w_F_nsl_2': 'blue'
+    }
+    },
+    'all_best_nsl_2': {
+        "strategies":[
+            'ebor_pef_T_etp_T_ueol_F_w_F_nsl_2',
+            'eihr_pef_T_etp_T_ueol_F_w_T_nsl_2',
+            'sespl_pef_F_etp_T_ueol_F_w_F_nsl_2',
+        ],
+    "NAME_TO_LABEL": {
+        'ebor_pef_T_etp_T_ueol_F_w_F_nsl_2': 'EBO (Post+RBM)',
+        'eihr_pef_T_etp_T_ueol_F_w_T_nsl_2': 'iEBO (Post+RBM)',
+        'sespl_pef_F_etp_T_ueol_F_w_F_nsl_2': 'BO (Post+RBS)' ,
+    },
+    "color_marker": {
+            'ebor_pef_T_etp_T_ueol_F_w_F_nsl_2': 'red',
             'eihr_pef_T_etp_T_ueol_F_w_T_nsl_2': 'green',
             'sespl_pef_F_etp_T_ueol_F_w_F_nsl_2': 'blue'
     }
