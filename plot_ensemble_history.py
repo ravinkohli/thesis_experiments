@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from plot_utilities import incumbent_plot, incumbent_plot_with_lists, save_fig, set_general_plot_style
 import seaborn as sns
-from experiment_utils import SEEDS, TASKS, X_LABEL, X_MAP, Y_LABEL
+from experiment_utils import SEEDS, TASKS, X_LABEL, Y_MAP, Y_LABEL
 
 
 def make_incumbent_plot(
@@ -29,11 +29,14 @@ def make_incumbent_plot(
     dataset,
     color_marker,
     durations,
-    eih_results
+    eih_results,
+    experiment_set
 ):
 
     trajectories = []
     for task_index, task in enumerate(TASKS):
+        strategies_dict = {}
+        strategy_names = []
         set_general_plot_style()
 
         dataset_name = dataset_info[dataset_info['OpenML Task Id'] == task]['Dataset Name'].item()
@@ -42,21 +45,26 @@ def make_incumbent_plot(
             figsize=(5, 3),
 
         )
-        losses = {}
-        times = {}
-        min_y = np.inf
+        # losses = {}
+        # times = {}
+
         min_x = np.inf
         max_x = -np.inf
+        all_losses = []
+        all_times = []
         for strategy in strategies:
             if strategy not in results:
                 print(f"{strategy} not found")
                 continue
-            losses[strategy] = []
-            times[strategy] = []
+            strategy_name = name_to_label[strategy]
+            strategies_dict[strategy_name] = {}
+            strategy_names.append(strategy_name)
+            losses = []
+            times = []
             for seed in SEEDS:
                 if task in results[strategy] and seed in results[strategy][task] and 'ensemble_history' in results[strategy][task][seed]:
                     
-                    useful_results = results if 'eih' not in strategy or 'nsl_1' in strategy else eih_results
+                    useful_results = results if 'eih' not in strategy else eih_results
                     raw_loss = np.array(list(useful_results[strategy][task][seed]['ensemble_history'][f'{dataset}_balanced_accuracy'].values()))
                     failed_losses = [i for i in range(len(raw_loss)) if raw_loss[i] is None]
 
@@ -66,9 +74,9 @@ def make_incumbent_plot(
                     time = time - initial_time
 
                     raw_loss = np.delete(raw_loss, failed_losses)
-                    min_raw_loss = min(raw_loss)
-                    if min_raw_loss < min_y:
-                        min_y = min_raw_loss
+                    # min_raw_loss = min(raw_loss)
+                    # if min_raw_loss < min_y:
+                    #     min_y = min_raw_loss
                     raw_loss = np.append([0], raw_loss)
                     incumbent_loss = np.maximum.accumulate(raw_loss)
                     incumbent_time = np.delete(time, failed_losses)
@@ -79,43 +87,95 @@ def make_incumbent_plot(
                     if max_incumbent_time > max_x:
                         max_x = max_incumbent_time
                     incumbent_time = np.append([0], incumbent_time)
-                    losses[strategy].append(incumbent_loss)
-                    times[strategy].append(incumbent_time)
 
-        df = incumbent_plot_with_lists(
+                    # losses[strategy].append(incumbent_loss)
+                    # times[strategy].append(incumbent_time)
+                    losses.append(incumbent_loss)
+                    times.append(incumbent_time)
+
+            all_losses.append(losses)
+            all_times.append(times)
+
+            df = incumbent_plot(
                 ax=axs,
-                times=times,
-                losses=losses,
+                x=times,
+                y=losses,
                 name_to_label=name_to_label,
                 color_marker=color_marker,
+                title=dataset_name,
+                xlabel=X_LABEL,
+                ylabel=f"{dataset[0].replace('t', 'T')}{dataset[1:]} {Y_LABEL}",
+                strategy=strategy,
+                log=True,
             )
 
-        title=dataset_name
-        xlabel=X_LABEL
-        ylabel=f"{dataset[0].replace('t', 'T')}{dataset[1:]} {Y_LABEL}"
-        log=True
-        if title is not None:
-            axs.set_title(title, fontsize=18) # [title])
-        if xlabel is not None:
-            axs.set_xlabel(xlabel, fontsize=18)
-        if ylabel is not None:
-            axs.set_ylabel(ylabel, fontsize=18)
-        axs.grid(True, which="both", ls="-", alpha=0.8)
+        # df = incumbent_plot_with_lists(
+        #         ax=axs,
+        #         times=times,
+        #         losses=losses,
+        #         name_to_label=name_to_label,
+        #         color_marker=color_marker,
+        #     )
 
-        axs.tick_params(axis='both', which='major', labelsize=18)
+        # title=dataset_name
+        # xlabel=X_LABEL
+        # ylabel=f"{dataset[0].replace('t', 'T')}{dataset[1:]} {Y_LABEL}"
+        # log=True
+        # if title is not None:
+        #     axs.set_title(title, fontsize=18) # [title])
+        # if xlabel is not None:
+        #     axs.set_xlabel(xlabel, fontsize=18)
+        # if ylabel is not None:
+        #     axs.set_ylabel(ylabel, fontsize=18)
+        # axs.grid(True, which="both", ls="-", alpha=0.8)
 
-        if log:
-            axs.set_xscale("log")
+        # axs.tick_params(axis='both', which='major', labelsize=18)
+
+        # if log:
+        #     axs.set_xscale("log")
         
         # axs.set_xticks(X_MAP[task])
         axs.set_xlim(min_x, max_x)
-            
+        min_y = np.inf
+        for losses, times in zip(all_losses, all_times):
+            losses = [min(loss[time>=min_x]) for loss, time in zip(losses, times)]
+            min_loss = min(losses)
+            if min_loss < min_y:
+                min_y = min_loss
             # min(X_MAP[task]), max(X_MAP[task]))
             # axs[task_index].set_ylim(
             #     min(Y_MAP[dataset][experiment]),
             #     max(Y_MAP[dataset][experiment])
             # )
-        axs.set_ylim(ymin=min_y) # -0.1)
+        
+        max_y = 1
+
+        if experiment_set in Y_MAP:
+            min_y, max_y = Y_MAP[experiment_set][task]
+        
+        # min_y -= 0.1
+        # if task == 10101:
+        #     min_y = 0.6
+        #     max_y = 0.8
+        # elif task == 7592:
+        #     min_y = 0.45
+        #     max_y = 0.8
+        # elif task == 146195:
+        #     min_y = 0.65
+        #     max_y = 0.8
+        # elif task == 14965:
+        #     min_y = 0.8
+        #     max_y = 0.9
+        # elif task == 3:
+        #     min_y = .95
+        # elif task == 31:
+        #     min_y = 0.5
+        #     max_y = 0.8
+        # elif task == 9981:
+        #     min_y = 0.95
+
+
+        axs.set_ylim(ymin=min_y, ymax=max_y)
 
         sns.despine(fig)
 

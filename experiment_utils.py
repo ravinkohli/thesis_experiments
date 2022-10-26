@@ -13,7 +13,72 @@
 from re import A
 
 
-# Y_MAP = [0, 0.25, 0.5, 0.75, 1]
+Y_MAP = {}
+#     "all_base": {
+#         10101 : dict(
+#             min_y = 0.6,
+#             max_y = 0.8
+#         ),
+#         7592 : dict(
+#             min_y = 0.45,
+#             max_y = 0.8
+#         ),
+#         146195 : dict(
+#             min_y = 0.65,
+#             max_y = 0.8
+#         ),
+#         14965 : dict(
+#             min_y = 0.8,
+#             max_y = 0.9
+#         ),
+#         3 : dict(
+#             min_y = .95,
+#             max_y = 1
+#         ),
+#         31 : dict(
+#             min_y = 0.5,
+#             max_y = 0.8
+#         ),
+#         9981 : dict(
+#             min_y = 0.95,
+#             max_y = 1.0
+#         )
+#     },
+#     "es_all": {
+#         10101 : dict(
+#             min_y = 0.6,
+#             max_y = 0.75
+#         ),
+#         7592 : dict(
+#             min_y = 0.75,
+#             max_y = 1
+#         ),
+#         146195 : dict(
+#             min_y = 0.7,
+#             max_y = 0.8
+#         ),
+#         14965 : dict(
+#             min_y = 0.8,
+#             max_y = 0.9
+#         ),
+#         3 : dict(
+#             min_y = .98,
+#             max_y = 1
+#         ),
+#         31 : dict(
+#             min_y = 0.65,
+#             max_y = 0.8
+#         ),
+#         9981 : dict(
+#             min_y = 0.95,
+#             max_y = 1.0
+#         ),
+#         168335: dict(
+#             min_y = 0.9,
+#             max_y = 1.0
+#         )
+#     }
+# }
 X_MAP = {
     14965: [1e3,3e5],
     146195: [1e3, 3e5],

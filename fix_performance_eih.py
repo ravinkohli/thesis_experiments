@@ -5,7 +5,7 @@ from smac.tae import StatusType
 from experiment_utils import replace_key
 
 
-data = pickle.load(open('final_thesis_results/ensemble_size_5/task_id_to_performance_eih.pkl', 'rb'))
+data = pickle.load(open('final_thesis_results/ensemble_size_5/task_id_to_performance_eih_rerun.pkl', 'rb'))
 results = pickle.load(open('final_thesis_results/ensemble_size_5/task_id_to_performance_size_5.pkl', 'rb'))
 
 new_results = {}
@@ -72,4 +72,4 @@ for strategy in data:
                     new_data[strategy][task][seed]['ensemble_history'] = ensemble_history
 
 
-pickle.dump(new_data, open('trial_for_now.pkl', 'wb'))
+pickle.dump(new_data, open('task_id_to_performance_eih_rerun_fixed.pkl', 'wb'))

@@ -4,11 +4,11 @@ import os
 import seaborn as sns
 from tkinter.tix import Tree
 from typing import Dict, List, NamedTuple
-from autoPyTorch.utils.results_visualizer import PlotSettingParams
-from autoPyTorch.utils.results_visualizer import ResultsVisualizer, _get_perf_and_time
-from autoPyTorch import metrics
-from autoPyTorch.utils.results_manager import MetricResults
-from autoPyTorch.utils.results_visualizer import ColorLabelSettings
+# from autoPyTorch.utils.results_visualizer import PlotSettingParams
+# from autoPyTorch.utils.results_visualizer import ResultsVisualizer, _get_perf_and_time
+# from autoPyTorch import metrics
+# from autoPyTorch.utils.results_manager import MetricResults
+# from autoPyTorch.utils.results_visualizer import ColorLabelSettings
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -18,11 +18,11 @@ from scipy import stats
 
 
 
-class StoreResults(NamedTuple):
-    results: MetricResults
-    colors: Dict
-    labels: Dict
-    plot_setting_params: PlotSettingParams
+# class StoreResults(NamedTuple):
+#     results: MetricResults
+#     colors: Dict
+#     labels: Dict
+#     plot_setting_params: PlotSettingParams
 
 def interpolate_time(incumbents, costs, strategy):
     df_dict = {}
@@ -91,6 +91,7 @@ def incumbent_plot(
     if log:
         ax.set_xscale("log")
         # ax.set_yscale("log")
+    return df
 
 def interpolate_time_with_lists(incumbents, costs):
     df_dict = {}
@@ -299,7 +300,8 @@ def task_bool_mask(df_task:  pd.Series, benchmark=None, size=5):
     return bool_mask
 
 
-
+def plot_violin_rank(set, result_dir):
+    small_task_ids
 # for strategy, item in data.items():
 #     for task, item_2 in item.items():
 #         if 106 in item_2 and 'ensemble_history' in item_2[106]:

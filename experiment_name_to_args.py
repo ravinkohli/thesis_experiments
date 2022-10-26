@@ -37,11 +37,11 @@ parameters = {
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
-        'ensemble_size': [11],
+        'ensemble_size': [5],
         'use_ensemble_opt_loss': [False],
         'num_stacking_layers': [2], # , 3],
-        'posthoc_ensemble_fit': [True], # , False],
-        'enable_traditional_pipeline': [True, False],
+        'posthoc_ensemble_fit': [False], # , False],
+        'enable_traditional_pipeline': [False],
     },
     'ensemble_iterative_hpo_stacking':
     {
@@ -65,11 +65,11 @@ parameters = {
     {
         'splits': [3], # , 5],
         'repeats': [2], # [1, 2],
-        'ensemble_size': [11],
+        'ensemble_size': [5],
         'use_ensemble_opt_loss': [False],
         'num_stacking_layers': [2], # , 3],
-        'posthoc_ensemble_fit': [True], # , False],
-        'enable_traditional_pipeline': [True, False],
+        'posthoc_ensemble_fit': [False],
+        'enable_traditional_pipeline': [False],
     },
     'ensemble_iterative_hpo_repeats':
     {

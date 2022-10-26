@@ -5,6 +5,7 @@ from shutil import which
 from cd_creater import save_comparison, test_method
 from cd_creater_utils import ALGORITHM_COLUMN_NAME, TASK_COLUMN_NAME
 from get_acc_per_method import store_combined_results, store_split_excel_file
+from plot_average_ranks import make_average_rank_plot
 from plot_ensemble_history import make_incumbent_plot
 from experiment_utils import DATASET_INFO, SETS, replace_key
 import pandas as pd
@@ -54,7 +55,7 @@ parser.add_argument(
 parser.add_argument(
     '--eih_perf_file',
     type=str,
-    default='trial_for_now'
+    default='task_id_to_performance_eih'
 )
 parser.add_argument(
     '--dur_file',
@@ -84,9 +85,9 @@ if __name__ == '__main__':
             os.makedirs(out_dir)
         for dataset in ['train', 'test']:
             final_combined_results_file = os.path.join(out_dir, f'combined_results_mean_{dataset}.csv')
-            if not os.path.exists(final_combined_results_file):
-                store_split_excel_file(out_dir, args.size, result_dir, dataset)
-                store_combined_results(out_dir, dataset)
+            # if not os.path.exists(final_combined_results_file):
+            # store_split_excel_file(out_dir, args.size, result_dir, dataset)
+            store_combined_results(out_dir, dataset)
 
             dataset_info = pd.read_csv(DATASET_INFO)
             
@@ -131,12 +132,12 @@ if __name__ == '__main__':
             
             if args.ensemble_plot and dataset == 'test':
                 try:
-                    trajectories = make_incumbent_plot(figure_output_dir=os.path.join(out_dir, f"{dataset}_plots"), dataset_info=dataset_info, strategies=strategies, results=new_results, name_to_label=name_to_label, color_marker=color_marker, dataset=dataset, durations=new_durations, eih_results=eih_results)
+                    trajectories = make_incumbent_plot(figure_output_dir=os.path.join(out_dir, f"{dataset}_plots"), dataset_info=dataset_info, strategies=strategies, results=new_results, name_to_label=name_to_label, color_marker=color_marker, dataset=dataset, durations=new_durations, eih_results=eih_results, experiment_set=args.set)
                 except Exception as e:
-                    # raise(e)
+                    raise(e)
                     continue
-                if args.plot_ranks:
-                    print(trajectories)
+            if args.plot_ranks and dataset == 'test':
+                make_average_rank_plot(figure_output_dir=os.path.join(out_dir, f"{dataset}_plots"),  strategies=strategies, results=new_results, name_to_label=name_to_label, dataset=dataset, durations=new_durations, eih_results=eih_results)
 
         if args.overfit:
             make_overfit_plot(out_dir, strategies, name_to_label, color_marker)

@@ -9,7 +9,7 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib
-import Orange
+# import Orange
 
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
@@ -299,11 +299,11 @@ def draw_cd_diagram(setname, df_perf=None, alpha=0.05, title=None, labels=False,
     if graph_type == "default":
         graph_ranks(average_ranks.values, average_ranks.keys(), p_values,
                     cd=None, reverse=True, width=9, textspace=1.5, labels=labels)
-    else:
-        cd = Orange.evaluation.compute_CD(average_ranks.values, num_datasets, alpha="0.1", test="nemenyi") 
-        #tested on 14 datasets
-        print("cd=",cd)
-        Orange.evaluation.graph_ranks(average_ranks.values, average_ranks.keys(), cd=cd, width=5, textspace=1.5, cdmethod=0)
+    # else:
+    #     cd = Orange.evaluation.compute_CD(average_ranks.values, num_datasets, alpha="0.1", test="nemenyi") 
+    #     #tested on 14 datasets
+    #     print("cd=",cd)
+    #     Orange.evaluation.graph_ranks(average_ranks.values, average_ranks.keys(), cd=cd, width=5, textspace=1.5, cdmethod=0)
     font = {
         'family': 'sans-serif',
         'color':  'black',
