@@ -599,6 +599,26 @@ SETS = {
             'sft_pef_T_etp_T_ueol_F_w_F_nsl_2': 'red',
     }
     },
+    'all_best_repeat_stack': {
+        "strategies":[
+            'ebos_pef_T_etp_T_ueol_F_w_F_nsl_2',
+            'eihs_pef_T_etp_T_ueol_F_w_T_nsl_2',
+            'sespl_pef_F_etp_T_ueol_F_w_F_nsl_2',
+            # 'sft_pef_T_etp_T_ueol_F_w_F_nsl_2',
+        ],
+    "NAME_TO_LABEL": {
+        'ebos_pef_T_etp_T_ueol_F_w_F_nsl_2': 'EBO (Post+RBS)',
+        'eihs_pef_T_etp_T_ueol_F_w_T_nsl_2': 'iEBO (Post+RBS)',
+        'sespl_pef_F_etp_T_ueol_F_w_F_nsl_2': 'BO (Post+RBS)' ,
+        'sft_pef_T_etp_T_ueol_F_w_F_nsl_2': 'FiSEBO (Post+Trad)',
+    },
+    "color_marker": {
+            'ebos_pef_T_etp_T_ueol_F_w_F_nsl_2': 'green',
+            'eihs_pef_T_etp_T_ueol_F_w_T_nsl_2': 'blue',
+            'sespl_pef_F_etp_T_ueol_F_w_F_nsl_2': 'purple',
+            'sft_pef_T_etp_T_ueol_F_w_F_nsl_2': 'red',
+    }
+    },
     },
     'size_11': {
     'all_best_size_11': {

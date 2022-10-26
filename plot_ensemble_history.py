@@ -115,7 +115,30 @@ def make_incumbent_plot(
             #     min(Y_MAP[dataset][experiment]),
             #     max(Y_MAP[dataset][experiment])
             # )
-        axs.set_ylim(ymin=min_y) # -0.1)
+        # min_y -= 0.1
+        max_y = 1
+        if task == 10101:
+            min_y = 0.6
+            max_y = 0.8
+        elif task == 7592:
+            min_y = 0.45
+            # max_y = 0.8
+        elif task == 146195:
+            min_y = 0.65
+            max_y = 0.8
+        elif task == 14965:
+            min_y = 0.8
+            max_y = 0.9
+        elif task == 3:
+            min_y = .95
+        elif task == 31:
+            min_y = 0.5
+            max_y = 0.8
+        elif task == 9981:
+            min_y = 0.95
+        elif task == 168335:
+            min_y = 0.75
+        axs.set_ylim(ymin=min_y, ymax=max_y) # -0.1)
 
         sns.despine(fig)
 

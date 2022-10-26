@@ -133,7 +133,7 @@ if __name__ == '__main__':
                 try:
                     trajectories = make_incumbent_plot(figure_output_dir=os.path.join(out_dir, f"{dataset}_plots"), dataset_info=dataset_info, strategies=strategies, results=new_results, name_to_label=name_to_label, color_marker=color_marker, dataset=dataset, durations=new_durations, eih_results=eih_results)
                 except Exception as e:
-                    # raise(e)
+                    raise(e)
                     continue
                 if args.plot_ranks:
                     print(trajectories)
